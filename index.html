@@ -364,94 +364,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/05/Rsync%E9%85%8D%E7%BD%AE%E5%92%8C%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Well Wang">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Well Wang的blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/06/05/Rsync%E9%85%8D%E7%BD%AE%E5%92%8C%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">或使用rsync的同步数据</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2022-06-05 00:00:00 / 修改时间：15:32:03" itemprop="dateCreated datePublished" datetime="2022-06-05T00:00:00+08:00">2022-06-05</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Rsync 远程同步主要有两种方式：使用远程shell（ssh或rsh） 或使用rsync的daemon方式</p>
-<p>常用参数</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">-v :展示详细的同步信息</span><br><span class="line">-a :归档模式，相当于 -rlptgoD</span><br><span class="line">    -r :递归目录</span><br><span class="line">    -l :同步软连接文件</span><br><span class="line">    -p :保留权限</span><br><span class="line">    -t :将源文件的&quot;modify time&quot;同步到目标机器</span><br><span class="line">    -g :保持文件属组</span><br><span class="line">    -o :保持文件属主</span><br><span class="line">    -D :和--devices --specials一样，保持设备文件和特殊文件</span><br><span class="line">-z :发送数据前，先压缩再传输</span><br><span class="line">-H :保持硬链接</span><br><span class="line">-n :进行试运行，不作任何更改</span><br><span class="line">-P same as --partial --progress</span><br><span class="line">    --partial :支持断点续传</span><br><span class="line">    --progress :展示传输的进度</span><br><span class="line">--delete :如果源文件消失，目标文件也会被删除</span><br><span class="line">--delete-excluded :指定要在目的端删除的文件</span><br><span class="line">--delete-after :默认情况下，rsync是先清理目的端的文件再开始数据同步；如果使用此选项，则rsync会先进行数据同步，都完成后再删除那些需要清理的文件。</span><br><span class="line">--exclude=PATTERN :排除匹配PATTERN的文件</span><br><span class="line">--exclude-from=FILE :如果要排除的文件很多，可以统一写在某一文件中</span><br><span class="line">-e ssh :使用SSH加密隧道传输</span><br></pre></td></tr></table></figure>
-<p>本地文件同步</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@sync opt]# rsync -avH /opt/resource/ /tmp/desc/</span><br><span class="line"># 如果没有desc目录，会自动创建</span><br></pre></td></tr></table></figure>
-<p>远程文件同步–shell方式</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># 从本地传到远端，目标文件会被写成ssh登录用户的属组和属主（如下 www）</span><br><span class="line">[root@sync opt]# rsync -avH /opt/nginx-1.12.1/ www@172.18.50.125:/tmp/nginx/</span><br><span class="line"># 使用 ssh 加密隧道方式传输，保障数据的安全性</span><br><span class="line">[root@sync opt]# rsync -avHe ssh /opt/nginx-1.12.1/ www@172.18.50.125:/tmp/nginx/</span><br><span class="line"></span><br><span class="line"># 从远端传到本地，只要对目标文件有读的权限，就可以同步到本地</span><br><span class="line">[root@sync opt]# rsync -avH www@172.18.50.125:/tmp/nginx/ /tmp/nginx/</span><br><span class="line"></span><br><span class="line"># 如果远程服务器ssh端口不是默认的22</span><br><span class="line">[root@sync opt]# rsync -avHe &quot;ssh -p 11222&quot; /opt/nginx-1.12.1/ www@172.18.50.125:/tmp/nginx/</span><br></pre></td></tr></table></figure>
-<p>远程文件同步–daemon方式<br>环境</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">服务器A： 172.18.50.125(daemon)</span><br><span class="line">服务器B： 172.18.50.110</span><br><span class="line">系统： Centos 7</span><br><span class="line">Rsync版本：3.0.9</span><br></pre></td></tr></table></figure>
-<p>创建 rsync 服务的目录和配置文件</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@50_125 ~]# mkdir /etc/rsync</span><br><span class="line">[root@50_125 ~]# cd /etc/rsync</span><br><span class="line">[root@50_125 rsync]# touch rsyncd.conf</span><br><span class="line">[root@50_125 rsync]# touch rsyncd.secrets</span><br><span class="line">[root@50_125 rsync]# touch rsyncd.motd</span><br><span class="line">[root@50_125 rsync]# chmod 600 rsyncd.secrets</span><br></pre></td></tr></table></figure>
-<p>创建 rsync 服务的目录和配置文件</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@50_125 ~]# mkdir /etc/rsync</span><br><span class="line">[root@50_125 ~]# cd /etc/rsync</span><br><span class="line">[root@50_125 rsync]# touch rsyncd.conf</span><br><span class="line">[root@50_125 rsync]# touch rsyncd.secrets</span><br><span class="line">[root@50_125 rsync]# touch rsyncd.motd</span><br><span class="line">[root@50_125 rsync]# chmod 600 rsyncd.secrets</span><br></pre></td></tr></table></figure>
-<p>服务端配置<br>rsyncd.conf</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">### rsyncd.conf 文件的配置</span><br><span class="line">[root@50_125 rsync]# vim rsyncd.conf</span><br><span class="line"># /etc/rsyncd: configuration file for rsync daemon mode</span><br><span class="line"># See rsyncd.conf man page for more options.</span><br><span class="line"># 传输文件使用的用户和用户组，如果是从服务器=&gt;客户端，要保证www用户对文件有读取的权限；如果是从客户端=&gt;服务端，要保证www对文件有写权限。</span><br><span class="line">uid = www</span><br><span class="line">gid = www</span><br><span class="line"># 允许chroot，提升安全性，客户端连接模块，首先chroot到模块path参数指定的目录下，chroot为yes时必须使用root权限，且不能备份path路径外的链接文件</span><br><span class="line">use chroot = yes</span><br><span class="line"># 只读</span><br><span class="line">read only = no</span><br><span class="line"># 只写</span><br><span class="line">write only = no</span><br><span class="line"># 设定白名单，可以指定IP段（172.18.50.1/255.255.255.0）,各个Ip段用空格分开</span><br><span class="line">hosts allow = 172.18.50.110 172.18.50.111</span><br><span class="line">hosts deny = *</span><br><span class="line"># 允许的客户端最大连接数</span><br><span class="line">max connections = 4</span><br><span class="line"># 欢迎文件的路径，非必须</span><br><span class="line">motd file = /etc/rsync/rsyncd.motd</span><br><span class="line"># pid文件路径</span><br><span class="line">pid file = /var/run/rsyncd.pid</span><br><span class="line"># 记录传输文件日志</span><br><span class="line">transfer logging = yes</span><br><span class="line"># 日志文件格式</span><br><span class="line">log format = %t %a %m %f %b</span><br><span class="line"># 指定日志文件</span><br><span class="line">log file = /var/log/rsync.log</span><br><span class="line"># 剔除某些文件或目录，不同步</span><br><span class="line">exclude = lost+found/</span><br><span class="line"># 设置超时时间</span><br><span class="line">timeout = 900</span><br><span class="line">ignore nonreadable = yes</span><br><span class="line"># 设置不需要压缩的文件</span><br><span class="line">dont compress   = *.gz *.tgz *.zip *.z *.Z *.rpm *.deb *.bz2</span><br><span class="line"></span><br><span class="line"># 模块，可以配置多个，使用如: sate@172.18.50.125::125to110</span><br><span class="line">[125to110]</span><br><span class="line"># 模块的根目录，同步目录，要注意权限</span><br><span class="line">path = /tmp/nginx</span><br><span class="line"># 是否允许列出模块内容</span><br><span class="line">list = no</span><br><span class="line"># 忽略错误</span><br><span class="line">ignore errors</span><br><span class="line"># 添加注释</span><br><span class="line">comment = ftp export area</span><br><span class="line"># 模块验证的用户名称，可使用空格或者逗号隔开多个用户名</span><br><span class="line">auth users = sate</span><br><span class="line"># 模块验证密码文件 可放在全局配置里</span><br><span class="line">secrets file = /etc/rsync/rsyncd.secrets</span><br><span class="line"># 剔除某些文件或目录，不同步</span><br><span class="line">exclude = lost+found/ conf/ man/</span><br></pre></td></tr></table></figure>
-<p>rsyncd.secrets</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">### rsyncd.secrets 文件的配置</span><br><span class="line">[root@50_125 rsync]# cat rsyncd.secrets</span><br><span class="line"># 用户名:密码</span><br><span class="line">sate:111111</span><br></pre></td></tr></table></figure>
-<p>rsyncd.motd</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">### rsyncd.motd  文件配置</span><br><span class="line">[root@50_125 rsync]# cat rsyncd.motd</span><br><span class="line">++++++++++++++++++</span><br><span class="line">sate zheng : rsync start</span><br><span class="line">++++++++++++++++++</span><br></pre></td></tr></table></figure>
-<p>启动</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@50_125 rsync]# rsync --daemon --config=/etc/rsync/rsyncd.conf</span><br></pre></td></tr></table></figure>
-<p>客户端配置<br>从 服务端=&gt;客户端 同步数据</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 会提示输入密码</span><br><span class="line">[root@50_110 ~]# rsync -avzP --delete sate@172.18.50.125::125to110 /tmp/sync/</span><br></pre></td></tr></table></figure>
-<p>从 客户端=&gt;服务端 同步数据</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 会提示输入密码</span><br><span class="line">[root@50_110 ~]# rsync -avzP --delete /tmp/sync/ sate@172.18.50.125::125to110</span><br><span class="line"></span><br><span class="line">注: 如果是 /tmp/sync，则同步sync目录；如果 /tmp/sync/，则同步sync目录下的文件</span><br></pre></td></tr></table></figure>
-<p>问题：–exclude 排除文件目录时，如果有多个同名目录的情况</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"># 目录结构</span><br><span class="line">[root@WJ110 sync]# tree</span><br><span class="line">.</span><br><span class="line">├── dir1</span><br><span class="line">│   └── test</span><br><span class="line">│       ├── 3.file</span><br><span class="line">│       ├── 4.file</span><br><span class="line">│       └── 5.file</span><br><span class="line">├── dir2</span><br><span class="line">└── test</span><br><span class="line">    ├── 1.file</span><br><span class="line">    ├── 2.file</span><br><span class="line">    └── 3.file</span><br><span class="line"></span><br><span class="line"># 情况一 ： 排除 /test 目录，同步其他目录（同步的是/tmp/sync/ 下边的文件）</span><br><span class="line">[root@WJ110 sync]# rsync -avP --delete --password-file=/tmp/secrets.file --exclude=test  /tmp/sync/ sate@172.18.50.125::125to110</span><br><span class="line">sending incremental file list</span><br><span class="line">./</span><br><span class="line">dir1/</span><br><span class="line">dir2/</span><br><span class="line"># 会发现，该目录下所有 test 目录都被排除了，如果想只排除第一层目录的 test，可以如下（/ 代表所同步目录第一层）：</span><br><span class="line">[root@WJ110 sync]# rsync -avP --delete --password-file=/tmp/secrets.file --exclude=/test/  /tmp/sync/ sate@172.18.50.125::125to110</span><br><span class="line">sending incremental file list</span><br><span class="line">./</span><br><span class="line">dir1/</span><br><span class="line">dir1/test/</span><br><span class="line">dir1/test/3.file</span><br><span class="line">           0 100%    0.00kB/s    0:00:00 (xfer#1, to-check=2/7)</span><br><span class="line">dir1/test/4.file</span><br><span class="line">           0 100%    0.00kB/s    0:00:00 (xfer#2, to-check=1/7)</span><br><span class="line">dir1/test/5.file</span><br><span class="line">           0 100%    0.00kB/s    0:00:00 (xfer#3, to-check=0/7)</span><br><span class="line">dir2/</span><br><span class="line"></span><br><span class="line">sent 267 bytes  received 80 bytes  694.00 bytes/sec</span><br><span class="line">total size is 0  speedup is 0.00</span><br><span class="line"></span><br><span class="line"># 情况二 ： 和情况一不同的是 同步的 /tmp/sync 这个目录（同步的是/tmp/sync 目录本身，导致 exclude 后边的参数也会变化）</span><br><span class="line">[root@WJ110 sync]# rsync -avP --delete --password-file=/tmp/secrets.file --exclude=/sync/test/  /tmp/sync sate@172.18.50.125::125to110</span><br><span class="line">sending incremental file list</span><br><span class="line">sync/</span><br><span class="line">sync/dir1/</span><br><span class="line">sync/dir1/test/</span><br><span class="line">sync/dir1/test/3.file</span><br><span class="line">           0 100%    0.00kB/s    0:00:00 (xfer#1, to-check=2/7)</span><br><span class="line">sync/dir1/test/4.file</span><br><span class="line">           0 100%    0.00kB/s    0:00:00 (xfer#2, to-check=1/7)</span><br><span class="line">sync/dir1/test/5.file</span><br><span class="line">           0 100%    0.00kB/s    0:00:00 (xfer#3, to-check=0/7)</span><br><span class="line">sync/dir2/</span><br><span class="line"></span><br><span class="line">sent 282 bytes  received 81 bytes  726.00 bytes/sec</span><br><span class="line">total size is 0  speedup is 0.00</span><br></pre></td></tr></table></figure>
-<p>免密码同步</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 将密码写到文件，再通过 --password-file 指定该文件，注：该文件的权限必须是 600</span><br><span class="line">[root@50_110 ~]# echo &quot;111111&quot; &gt; /tmp/secrets.file</span><br><span class="line">[root@50_110 ~]# chmod 600 /tmp/secrets.file</span><br><span class="line">[root@50_110 ~]# rsync -avzP --delete --password-file=/tmp/secrets.file sate@172.18.50.125::125to110 /tmp/sync/</span><br></pre></td></tr></table></figure>
-<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/bd3ae9d8069c">参考文件</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/05/archlinux%E5%9F%BA%E6%9C%AC%E5%AE%89%E8%A3%85-UEFI%E6%A8%A1%E5%BC%8F/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -584,6 +496,237 @@
 <ol start="31">
 <li>安装完成 重启电脑</li>
 </ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/05/Rsync%E9%85%8D%E7%BD%AE%E5%92%8C%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Well Wang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Well Wang的blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/06/05/Rsync%E9%85%8D%E7%BD%AE%E5%92%8C%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">或使用rsync的同步数据</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-06-05 00:00:00 / 修改时间：15:32:03" itemprop="dateCreated datePublished" datetime="2022-06-05T00:00:00+08:00">2022-06-05</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>Rsync 远程同步主要有两种方式：使用远程shell（ssh或rsh） 或使用rsync的daemon方式</p>
+<p>常用参数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">-v :展示详细的同步信息</span><br><span class="line">-a :归档模式，相当于 -rlptgoD</span><br><span class="line">    -r :递归目录</span><br><span class="line">    -l :同步软连接文件</span><br><span class="line">    -p :保留权限</span><br><span class="line">    -t :将源文件的&quot;modify time&quot;同步到目标机器</span><br><span class="line">    -g :保持文件属组</span><br><span class="line">    -o :保持文件属主</span><br><span class="line">    -D :和--devices --specials一样，保持设备文件和特殊文件</span><br><span class="line">-z :发送数据前，先压缩再传输</span><br><span class="line">-H :保持硬链接</span><br><span class="line">-n :进行试运行，不作任何更改</span><br><span class="line">-P same as --partial --progress</span><br><span class="line">    --partial :支持断点续传</span><br><span class="line">    --progress :展示传输的进度</span><br><span class="line">--delete :如果源文件消失，目标文件也会被删除</span><br><span class="line">--delete-excluded :指定要在目的端删除的文件</span><br><span class="line">--delete-after :默认情况下，rsync是先清理目的端的文件再开始数据同步；如果使用此选项，则rsync会先进行数据同步，都完成后再删除那些需要清理的文件。</span><br><span class="line">--exclude=PATTERN :排除匹配PATTERN的文件</span><br><span class="line">--exclude-from=FILE :如果要排除的文件很多，可以统一写在某一文件中</span><br><span class="line">-e ssh :使用SSH加密隧道传输</span><br></pre></td></tr></table></figure>
+<p>本地文件同步</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@sync opt]# rsync -avH /opt/resource/ /tmp/desc/</span><br><span class="line"># 如果没有desc目录，会自动创建</span><br></pre></td></tr></table></figure>
+<p>远程文件同步–shell方式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># 从本地传到远端，目标文件会被写成ssh登录用户的属组和属主（如下 www）</span><br><span class="line">[root@sync opt]# rsync -avH /opt/nginx-1.12.1/ www@172.18.50.125:/tmp/nginx/</span><br><span class="line"># 使用 ssh 加密隧道方式传输，保障数据的安全性</span><br><span class="line">[root@sync opt]# rsync -avHe ssh /opt/nginx-1.12.1/ www@172.18.50.125:/tmp/nginx/</span><br><span class="line"></span><br><span class="line"># 从远端传到本地，只要对目标文件有读的权限，就可以同步到本地</span><br><span class="line">[root@sync opt]# rsync -avH www@172.18.50.125:/tmp/nginx/ /tmp/nginx/</span><br><span class="line"></span><br><span class="line"># 如果远程服务器ssh端口不是默认的22</span><br><span class="line">[root@sync opt]# rsync -avHe &quot;ssh -p 11222&quot; /opt/nginx-1.12.1/ www@172.18.50.125:/tmp/nginx/</span><br></pre></td></tr></table></figure>
+<p>远程文件同步–daemon方式<br>环境</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">服务器A： 172.18.50.125(daemon)</span><br><span class="line">服务器B： 172.18.50.110</span><br><span class="line">系统： Centos 7</span><br><span class="line">Rsync版本：3.0.9</span><br></pre></td></tr></table></figure>
+<p>创建 rsync 服务的目录和配置文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@50_125 ~]# mkdir /etc/rsync</span><br><span class="line">[root@50_125 ~]# cd /etc/rsync</span><br><span class="line">[root@50_125 rsync]# touch rsyncd.conf</span><br><span class="line">[root@50_125 rsync]# touch rsyncd.secrets</span><br><span class="line">[root@50_125 rsync]# touch rsyncd.motd</span><br><span class="line">[root@50_125 rsync]# chmod 600 rsyncd.secrets</span><br></pre></td></tr></table></figure>
+<p>创建 rsync 服务的目录和配置文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@50_125 ~]# mkdir /etc/rsync</span><br><span class="line">[root@50_125 ~]# cd /etc/rsync</span><br><span class="line">[root@50_125 rsync]# touch rsyncd.conf</span><br><span class="line">[root@50_125 rsync]# touch rsyncd.secrets</span><br><span class="line">[root@50_125 rsync]# touch rsyncd.motd</span><br><span class="line">[root@50_125 rsync]# chmod 600 rsyncd.secrets</span><br></pre></td></tr></table></figure>
+<p>服务端配置<br>rsyncd.conf</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">### rsyncd.conf 文件的配置</span><br><span class="line">[root@50_125 rsync]# vim rsyncd.conf</span><br><span class="line"># /etc/rsyncd: configuration file for rsync daemon mode</span><br><span class="line"># See rsyncd.conf man page for more options.</span><br><span class="line"># 传输文件使用的用户和用户组，如果是从服务器=&gt;客户端，要保证www用户对文件有读取的权限；如果是从客户端=&gt;服务端，要保证www对文件有写权限。</span><br><span class="line">uid = www</span><br><span class="line">gid = www</span><br><span class="line"># 允许chroot，提升安全性，客户端连接模块，首先chroot到模块path参数指定的目录下，chroot为yes时必须使用root权限，且不能备份path路径外的链接文件</span><br><span class="line">use chroot = yes</span><br><span class="line"># 只读</span><br><span class="line">read only = no</span><br><span class="line"># 只写</span><br><span class="line">write only = no</span><br><span class="line"># 设定白名单，可以指定IP段（172.18.50.1/255.255.255.0）,各个Ip段用空格分开</span><br><span class="line">hosts allow = 172.18.50.110 172.18.50.111</span><br><span class="line">hosts deny = *</span><br><span class="line"># 允许的客户端最大连接数</span><br><span class="line">max connections = 4</span><br><span class="line"># 欢迎文件的路径，非必须</span><br><span class="line">motd file = /etc/rsync/rsyncd.motd</span><br><span class="line"># pid文件路径</span><br><span class="line">pid file = /var/run/rsyncd.pid</span><br><span class="line"># 记录传输文件日志</span><br><span class="line">transfer logging = yes</span><br><span class="line"># 日志文件格式</span><br><span class="line">log format = %t %a %m %f %b</span><br><span class="line"># 指定日志文件</span><br><span class="line">log file = /var/log/rsync.log</span><br><span class="line"># 剔除某些文件或目录，不同步</span><br><span class="line">exclude = lost+found/</span><br><span class="line"># 设置超时时间</span><br><span class="line">timeout = 900</span><br><span class="line">ignore nonreadable = yes</span><br><span class="line"># 设置不需要压缩的文件</span><br><span class="line">dont compress   = *.gz *.tgz *.zip *.z *.Z *.rpm *.deb *.bz2</span><br><span class="line"></span><br><span class="line"># 模块，可以配置多个，使用如: sate@172.18.50.125::125to110</span><br><span class="line">[125to110]</span><br><span class="line"># 模块的根目录，同步目录，要注意权限</span><br><span class="line">path = /tmp/nginx</span><br><span class="line"># 是否允许列出模块内容</span><br><span class="line">list = no</span><br><span class="line"># 忽略错误</span><br><span class="line">ignore errors</span><br><span class="line"># 添加注释</span><br><span class="line">comment = ftp export area</span><br><span class="line"># 模块验证的用户名称，可使用空格或者逗号隔开多个用户名</span><br><span class="line">auth users = sate</span><br><span class="line"># 模块验证密码文件 可放在全局配置里</span><br><span class="line">secrets file = /etc/rsync/rsyncd.secrets</span><br><span class="line"># 剔除某些文件或目录，不同步</span><br><span class="line">exclude = lost+found/ conf/ man/</span><br></pre></td></tr></table></figure>
+<p>rsyncd.secrets</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">### rsyncd.secrets 文件的配置</span><br><span class="line">[root@50_125 rsync]# cat rsyncd.secrets</span><br><span class="line"># 用户名:密码</span><br><span class="line">sate:111111</span><br></pre></td></tr></table></figure>
+<p>rsyncd.motd</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">### rsyncd.motd  文件配置</span><br><span class="line">[root@50_125 rsync]# cat rsyncd.motd</span><br><span class="line">++++++++++++++++++</span><br><span class="line">sate zheng : rsync start</span><br><span class="line">++++++++++++++++++</span><br></pre></td></tr></table></figure>
+<p>启动</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@50_125 rsync]# rsync --daemon --config=/etc/rsync/rsyncd.conf</span><br></pre></td></tr></table></figure>
+<p>客户端配置<br>从 服务端=&gt;客户端 同步数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 会提示输入密码</span><br><span class="line">[root@50_110 ~]# rsync -avzP --delete sate@172.18.50.125::125to110 /tmp/sync/</span><br></pre></td></tr></table></figure>
+<p>从 客户端=&gt;服务端 同步数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 会提示输入密码</span><br><span class="line">[root@50_110 ~]# rsync -avzP --delete /tmp/sync/ sate@172.18.50.125::125to110</span><br><span class="line"></span><br><span class="line">注: 如果是 /tmp/sync，则同步sync目录；如果 /tmp/sync/，则同步sync目录下的文件</span><br></pre></td></tr></table></figure>
+<p>问题：–exclude 排除文件目录时，如果有多个同名目录的情况</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"># 目录结构</span><br><span class="line">[root@WJ110 sync]# tree</span><br><span class="line">.</span><br><span class="line">├── dir1</span><br><span class="line">│   └── test</span><br><span class="line">│       ├── 3.file</span><br><span class="line">│       ├── 4.file</span><br><span class="line">│       └── 5.file</span><br><span class="line">├── dir2</span><br><span class="line">└── test</span><br><span class="line">    ├── 1.file</span><br><span class="line">    ├── 2.file</span><br><span class="line">    └── 3.file</span><br><span class="line"></span><br><span class="line"># 情况一 ： 排除 /test 目录，同步其他目录（同步的是/tmp/sync/ 下边的文件）</span><br><span class="line">[root@WJ110 sync]# rsync -avP --delete --password-file=/tmp/secrets.file --exclude=test  /tmp/sync/ sate@172.18.50.125::125to110</span><br><span class="line">sending incremental file list</span><br><span class="line">./</span><br><span class="line">dir1/</span><br><span class="line">dir2/</span><br><span class="line"># 会发现，该目录下所有 test 目录都被排除了，如果想只排除第一层目录的 test，可以如下（/ 代表所同步目录第一层）：</span><br><span class="line">[root@WJ110 sync]# rsync -avP --delete --password-file=/tmp/secrets.file --exclude=/test/  /tmp/sync/ sate@172.18.50.125::125to110</span><br><span class="line">sending incremental file list</span><br><span class="line">./</span><br><span class="line">dir1/</span><br><span class="line">dir1/test/</span><br><span class="line">dir1/test/3.file</span><br><span class="line">           0 100%    0.00kB/s    0:00:00 (xfer#1, to-check=2/7)</span><br><span class="line">dir1/test/4.file</span><br><span class="line">           0 100%    0.00kB/s    0:00:00 (xfer#2, to-check=1/7)</span><br><span class="line">dir1/test/5.file</span><br><span class="line">           0 100%    0.00kB/s    0:00:00 (xfer#3, to-check=0/7)</span><br><span class="line">dir2/</span><br><span class="line"></span><br><span class="line">sent 267 bytes  received 80 bytes  694.00 bytes/sec</span><br><span class="line">total size is 0  speedup is 0.00</span><br><span class="line"></span><br><span class="line"># 情况二 ： 和情况一不同的是 同步的 /tmp/sync 这个目录（同步的是/tmp/sync 目录本身，导致 exclude 后边的参数也会变化）</span><br><span class="line">[root@WJ110 sync]# rsync -avP --delete --password-file=/tmp/secrets.file --exclude=/sync/test/  /tmp/sync sate@172.18.50.125::125to110</span><br><span class="line">sending incremental file list</span><br><span class="line">sync/</span><br><span class="line">sync/dir1/</span><br><span class="line">sync/dir1/test/</span><br><span class="line">sync/dir1/test/3.file</span><br><span class="line">           0 100%    0.00kB/s    0:00:00 (xfer#1, to-check=2/7)</span><br><span class="line">sync/dir1/test/4.file</span><br><span class="line">           0 100%    0.00kB/s    0:00:00 (xfer#2, to-check=1/7)</span><br><span class="line">sync/dir1/test/5.file</span><br><span class="line">           0 100%    0.00kB/s    0:00:00 (xfer#3, to-check=0/7)</span><br><span class="line">sync/dir2/</span><br><span class="line"></span><br><span class="line">sent 282 bytes  received 81 bytes  726.00 bytes/sec</span><br><span class="line">total size is 0  speedup is 0.00</span><br></pre></td></tr></table></figure>
+<p>免密码同步</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 将密码写到文件，再通过 --password-file 指定该文件，注：该文件的权限必须是 600</span><br><span class="line">[root@50_110 ~]# echo &quot;111111&quot; &gt; /tmp/secrets.file</span><br><span class="line">[root@50_110 ~]# chmod 600 /tmp/secrets.file</span><br><span class="line">[root@50_110 ~]# rsync -avzP --delete --password-file=/tmp/secrets.file sate@172.18.50.125::125to110 /tmp/sync/</span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/bd3ae9d8069c">参考文件</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/05/arch%E4%B8%8B%E6%8C%82%E8%BD%BD%E6%96%B0%E7%A1%AC%E7%9B%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Well Wang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Well Wang的blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/06/05/arch%E4%B8%8B%E6%8C%82%E8%BD%BD%E6%96%B0%E7%A1%AC%E7%9B%98/" class="post-title-link" itemprop="url">archlinux挂载新硬盘</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-06-05 00:00:00 / 修改时间：15:31:40" itemprop="dateCreated datePublished" datetime="2022-06-05T00:00:00+08:00">2022-06-05</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <ol>
+<li>查看未挂载硬盘</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fdisk -l</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>对新增硬件进行分区</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">fdisk /dev/sdb</span><br><span class="line">[root@localhost ~]#  fdisk /dev/sdb</span><br><span class="line"></span><br><span class="line">The number of cylinders for this disk is set to 36472.</span><br><span class="line">There is nothing wrong with that, but this is larger than 1024,</span><br><span class="line">and could in certain setups cause problems with:</span><br><span class="line">1) software that runs at boot time (e.g., old versions of LILO)</span><br><span class="line">2) booting and partitioning software from other OSs</span><br><span class="line">   (e.g., DOS FDISK, OS/2 FDISK)</span><br><span class="line"></span><br><span class="line">Command (m for help):  n</span><br><span class="line">Command action</span><br><span class="line">   e   extended</span><br><span class="line">   p   primary partition (1-4)</span><br><span class="line">p</span><br><span class="line">Partition number (1-4):  1</span><br><span class="line">First cylinder (1-36472, default 1):</span><br><span class="line">Using default value 1</span><br><span class="line">Last cylinder or +size or +sizeM or +sizeK (1-36472, default 36472):</span><br><span class="line">Using default value 36472</span><br><span class="line"></span><br><span class="line">Command (m for help):  w</span><br><span class="line">The partition table has been altered!</span><br><span class="line"></span><br><span class="line">Calling ioctl() to re-read partition table.</span><br><span class="line">Syncing disks.</span><br></pre></td></tr></table></figure>
+
+<p>再次查看分区情况，多出来一个/dev/sdb1 的区，这个1是我们在前面指定的，如果我们指定2，就变成 sdb2了</p>
+<p>3.查看分区</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fdisk -l</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>格式化分区</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkfs -t ext4 /dev/sdb1</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>挂载</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount /ssd</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/05/arch%E4%B8%8Ewindos%E7%B3%BB%E7%BB%9FU%E7%9B%98%E4%BC%A0%E8%BE%93%E6%96%87%E4%BB%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Well Wang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Well Wang的blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/06/05/arch%E4%B8%8Ewindos%E7%B3%BB%E7%BB%9FU%E7%9B%98%E4%BC%A0%E8%BE%93%E6%96%87%E4%BB%B6/" class="post-title-link" itemprop="url">archlinux与windows传输文件</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-06-05 00:00:00 / 修改时间：15:31:41" itemprop="dateCreated datePublished" datetime="2022-06-05T00:00:00+08:00">2022-06-05</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>linux下下载支持格式化为ntfs的包</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo pacman -S ntfsprogs</span><br></pre></td></tr></table></figure>
+<p>格式化硬盘，加上-F 要不报错</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo mkfs.ntfs -F /dev/sdc</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
       
     </div>
@@ -1149,149 +1292,6 @@ plugins=(
 <p>启动</p>
 <pre><code>simplescreenrecorder
 </code></pre>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/05/arch%E4%B8%8B%E6%8C%82%E8%BD%BD%E6%96%B0%E7%A1%AC%E7%9B%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Well Wang">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Well Wang的blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/06/05/arch%E4%B8%8B%E6%8C%82%E8%BD%BD%E6%96%B0%E7%A1%AC%E7%9B%98/" class="post-title-link" itemprop="url">archlinux挂载新硬盘</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2022-06-05 00:00:00 / 修改时间：15:31:40" itemprop="dateCreated datePublished" datetime="2022-06-05T00:00:00+08:00">2022-06-05</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <ol>
-<li>查看未挂载硬盘</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fdisk -l</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>对新增硬件进行分区</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">fdisk /dev/sdb</span><br><span class="line">[root@localhost ~]#  fdisk /dev/sdb</span><br><span class="line"></span><br><span class="line">The number of cylinders for this disk is set to 36472.</span><br><span class="line">There is nothing wrong with that, but this is larger than 1024,</span><br><span class="line">and could in certain setups cause problems with:</span><br><span class="line">1) software that runs at boot time (e.g., old versions of LILO)</span><br><span class="line">2) booting and partitioning software from other OSs</span><br><span class="line">   (e.g., DOS FDISK, OS/2 FDISK)</span><br><span class="line"></span><br><span class="line">Command (m for help):  n</span><br><span class="line">Command action</span><br><span class="line">   e   extended</span><br><span class="line">   p   primary partition (1-4)</span><br><span class="line">p</span><br><span class="line">Partition number (1-4):  1</span><br><span class="line">First cylinder (1-36472, default 1):</span><br><span class="line">Using default value 1</span><br><span class="line">Last cylinder or +size or +sizeM or +sizeK (1-36472, default 36472):</span><br><span class="line">Using default value 36472</span><br><span class="line"></span><br><span class="line">Command (m for help):  w</span><br><span class="line">The partition table has been altered!</span><br><span class="line"></span><br><span class="line">Calling ioctl() to re-read partition table.</span><br><span class="line">Syncing disks.</span><br></pre></td></tr></table></figure>
-
-<p>再次查看分区情况，多出来一个/dev/sdb1 的区，这个1是我们在前面指定的，如果我们指定2，就变成 sdb2了</p>
-<p>3.查看分区</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fdisk -l</span><br></pre></td></tr></table></figure>
-
-<ol start="4">
-<li>格式化分区</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkfs -t ext4 /dev/sdb1</span><br></pre></td></tr></table></figure>
-
-<ol start="5">
-<li>挂载</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount /ssd</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/05/arch%E4%B8%8Ewindos%E7%B3%BB%E7%BB%9FU%E7%9B%98%E4%BC%A0%E8%BE%93%E6%96%87%E4%BB%B6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Well Wang">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Well Wang的blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/06/05/arch%E4%B8%8Ewindos%E7%B3%BB%E7%BB%9FU%E7%9B%98%E4%BC%A0%E8%BE%93%E6%96%87%E4%BB%B6/" class="post-title-link" itemprop="url">archlinux与windows传输文件</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2022-06-05 00:00:00 / 修改时间：15:31:41" itemprop="dateCreated datePublished" datetime="2022-06-05T00:00:00+08:00">2022-06-05</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>linux下下载支持格式化为ntfs的包</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo pacman -S ntfsprogs</span><br></pre></td></tr></table></figure>
-<p>格式化硬盘，加上-F 要不报错</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo mkfs.ntfs -F /dev/sdc</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
       
     </div>
