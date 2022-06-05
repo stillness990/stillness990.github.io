@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="自己部署的 NextCloud 云盘服务具有以下优点： 开放灵活。NextCloud 是一套开源的云盘系统，本身功能非常成熟可靠。而且支持插件定制，应用商店中有很多好用的插件可以使用。 便于访问。支持通过 PC 端、移动端、浏览器来使用。跨端同步你的文件，随时随地都能访问你的数据。你还可以将你的文件分享给朋友或同事。 高效工作。你可以在线查看 PDF、文档、照片、视频，甚至在线编辑流程图、思维导图">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ubuntu下云盘搭建">
+<meta property="og:url" content="http://example.com/2022/06/05/nextcloud/index.html">
+<meta property="og:site_name" content="Well Wang的blog">
+<meta property="og:description" content="自己部署的 NextCloud 云盘服务具有以下优点： 开放灵活。NextCloud 是一套开源的云盘系统，本身功能非常成熟可靠。而且支持插件定制，应用商店中有很多好用的插件可以使用。 便于访问。支持通过 PC 端、移动端、浏览器来使用。跨端同步你的文件，随时随地都能访问你的数据。你还可以将你的文件分享给朋友或同事。 高效工作。你可以在线查看 PDF、文档、照片、视频，甚至在线编辑流程图、思维导图">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-06-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-05T07:31:51.389Z">
+<meta property="article:author" content="Well Wang">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2022/06/05/nextcloud/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>ubuntu下云盘搭建 | Well Wang的blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Well Wang的blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/05/nextcloud/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Well Wang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Well Wang的blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ubuntu下云盘搭建
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-06-05 00:00:00 / 修改时间：15:31:51" itemprop="dateCreated datePublished" datetime="2022-06-05T00:00:00+08:00">2022-06-05</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>自己部署的 NextCloud 云盘服务具有以下优点：</p>
+<p>开放灵活。NextCloud 是一套开源的云盘系统，本身功能非常成熟可靠。而且支持插件定制，应用商店中有很多好用的插件可以使用。</p>
+<p>便于访问。支持通过 PC 端、移动端、浏览器来使用。跨端同步你的文件，随时随地都能访问你的数据。你还可以将你的文件分享给朋友或同事。</p>
+<p>高效工作。你可以在线查看 PDF、文档、照片、视频，甚至在线编辑流程图、思维导图！它不仅仅是一个云盘，更是一个高效的个人工作台。</p>
+<p>自主可控。服务就部署在你自己的服务器上，你甚至可以将它部署在封闭的内网环境中（比如公司内网）。再也不用担心云盘数据安全，也不用担心云盘厂商哪天跑路了。</p>
+<p>多人协作。支持任意多个用户，每个人拥有独立的云盘空间。多个用户之间可以共享文件夹，并协同编辑文档。适合家庭和小型企业使用。</p>
+<h4 id="部署步骤"><a href="#部署步骤" class="headerlink" title="部署步骤"></a>部署步骤</h4><p>这里使用阿里云 服务器</p>
+<ol>
+<li> 云服务器。</li>
+</ol>
+<p>由于本教程是个人云盘场景，因此推荐实例规格选择突发性能实例系列的。因为云盘场景不需要时刻都满负载计算，仅仅在你使用云盘时需要跑满负载。因此，选择突发性能实例系列的性价比更高（相同配置价格更低）。</p>
+<p>操作系统要选择 Ubuntu 20.04 的。否则本教程中的命令可能不适用。</p>
+<p>网络带宽计费模式建议选择按使用流量。理由与第一点相同。带宽峰值建议设置高一些，12Mbps 以上（带宽峰值速率不会增加费用，因为是按流量计费的）。</p>
+<p>在配置网络和安全组的时候，要勾选开放端口 80 和 443。否则云盘服务无法被访问到。如果你选择的是已有的安全组，确保它开放了端口 80 和 443。</p>
+<p>登录云服务器</p>
+<p>通过阿里云控制台，远程连接到云服务器。连接方式建议选择Workbench远程连接，用起来比较方便。</p>
+<p>后续操作皆在云服务器中完成。</p>
+<ol start="2">
+<li> 安装并启用 docker</li>
+</ol>
+<p>docker 是一款开源的容器运行工具，提供了一套便捷的服务打包、分发、部署方式。我们将要部署的服务就是通过 docker 容器来运行的。</p>
+<p>依次执行以下命令，通过自动化脚本完成 docker 安装：</p>
+<pre><code>curl -fsSL get.docker.com -o get-docker.sh
+
+sudo sh get-docker.sh --mirror Aliyun
+</code></pre>
+<p>直接拷贝上述文本到命令行中执行时，由于最后一行缺少换行符，因此需要你再手动按一次回车，来执行最后一条命令。</p>
+<p>依次执行以下命令，启用 docker：</p>
+<pre><code>sudo systemctl enable docker
+
+sudo systemctl start docker
+</code></pre>
+<ol start="3">
+<li> 安装 docker-compose</li>
+</ol>
+<p>docker-compose 是一款基于 docker 的容器编排工具。有了它，我们通过一份配置文件就能启动所有需要的服务。因此我们先来安装它：</p>
+<pre><code>sudo curl -L https://download.fastgit.org/docker/compose/releases/download/1.27.4/docker-compose-`uname -s`-`uname -m` &gt; /usr/local/bin/docker-compose
+
+sudo chmod +x /usr/local/bin/docker-compose
+</code></pre>
+<ol start="4">
+<li> 安装 git</li>
+</ol>
+<p>我们将使用 git 来拉取模板项目，因此请先安装 git：</p>
+<pre><code>sudo apt install git
+</code></pre>
+<p>准备 NextCloud 部署配置</p>
+<p>将我们提前配置好的部署环境克隆到服务器上：</p>
+<pre><code>git clone https://gitee.com/csr632/nextcloud-example
+
+cd nextcloud-example
+</code></pre>
+<p>执行配置修改脚本，它会自动将docker-compose.yml中的 IP 占位符your.domain.name替换成【你的服务器公网 IP】：</p>
+<pre><code>chmod +x ./prepare.sh
+
+./prepare.sh 你的服务器公网IP
+</code></pre>
+<p>注意将上面命令的【你的服务器公网 IP】替换成你的云服务器 IP。</p>
+<p>然后，就可以启动所有 docker 容器了：</p>
+<pre><code>docker-compose up -d
+</code></pre>
+<p>初次执行此命令时，会花费一些时间来拉取 docker 镜像。</p>
+<p>通过浏览器访问<a target="_blank" rel="noopener" href="https://你的ecs服务器公网ip.就可以访问你的私人云盘服务了!/">https://你的ECS服务器公网IP。就可以访问你的私人云盘服务了！</a></p>
+<p>注意，初次访问时，浏览器会提示“您的连接不是私密连接”。你需要依次点击“高级 - 继续前往（不安全）”。这里以 Chrome 浏览器为例，其他浏览器类似。</p>
+<p>之所以有这个警告，是因为我们部署 NextCloud 服务的时候，使用 IP 地址作为服务主机名，因此只能使用自签名的 https 证书来实现加密通信，而浏览器默认不会信任自签名的证书。 目前没有免费的方式得到基于 IP 主机名的权威 https 证书。未来当你有了自己的域名以后，可以申请免费的权威 https 证书，避免初次访问时手动信任证书。</p>
+<p>完成上述步骤以后，你就真正看到了你的 NextCloud 服务！初次使用时，它会引导你注册一个管理员账号。然后你就可以尽情探索了！</p>
+<p>注册管理员账号时，不要勾选“install apps”，原因参考下面的注意事项。你可以登录成功以后再到应用商店下载。 初次注册管理账号时，会比较慢，可能会造成网页请求超时。没关系，注册管理账号的过程依然在背后默默进行。刷新页面以后你依然使用刚才注册的管理账号来登录即可。可能需要刷新页面重试几次。</p>
+<p>成功进入云盘以后，建议你先将应用语言修改成中文：右上角 - Settings - Language - 简体中文。然后就开始尽情探索吧！</p>
+<p>推荐应用</p>
+<p>NextCloud 的其中一个核心亮点是，可以从应用商店安装新的应用到你的 NextCloud 服务中。你可以依次点击右上角 - 应用来管理你的应用。</p>
+<p>下面推荐几款我正在使用的应用：</p>
+<p>Draw.io 大名鼎鼎的画图神器，各种 UML 图、线框图都可以画！在线画图，点击保存，随处访问！</p>
+<p>Mind Map 专门用来画思维导图的神器。</p>
+<p>Markdown Editor 让你可以直接在线编辑 Markdown 文件。</p>
+<p>Notes 笔记本功能。安装以后顶栏会出现一个笔记按钮，管理笔记更加方便。</p>
+<p>还有更多优质应用等待你探索！</p>
+<p>注意事项</p>
+<p>由于 NextCloud 的应用商店服务器在国外，从国内的服务器连接过去经常会超时。因此如果遇到应用安装失败的话需要重试几次。</p>
+<p>使用客户端</p>
+<p>如果希望在手机或平板上使用，可以在 Google Play 或者苹果 App Store 下载 NextCloud 的客户端。 对于国内无法使用 Google Play 的用户，可以直接到NextCloud 的 Github下载 apk 安装包。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/06/05/nginx%E4%BB%A3%E7%90%86/" rel="prev" title="nginx代理服务">
+      <i class="fa fa-chevron-left"></i> nginx代理服务
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/06/05/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%A4%87%E7%94%A8%E6%89%8B%E5%86%8C/" rel="next" title="linux速查手册">
+      linux速查手册 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.</span> <span class="nav-text">部署步骤</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Well Wang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Well Wang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

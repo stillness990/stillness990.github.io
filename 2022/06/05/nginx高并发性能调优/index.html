@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、nigxin配置文件优化 设置nginx进程数，推荐按照cpu数目来指定，一般跟cpu核数相同。 1worker_processes 8;  为每个进程分配cpu，上例中将8个进程分配到8个cpu，当然可以写多个，或者将一个进程分配到多个cpu。 1worker_cpu_affinity 0001 0010 0011 0100 0101 0110 0111 1000;  配置nginx进程打开">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nginx高并发调优">
+<meta property="og:url" content="http://example.com/2022/06/05/nginx%E9%AB%98%E5%B9%B6%E5%8F%91%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/index.html">
+<meta property="og:site_name" content="Well Wang的blog">
+<meta property="og:description" content="一、nigxin配置文件优化 设置nginx进程数，推荐按照cpu数目来指定，一般跟cpu核数相同。 1worker_processes 8;  为每个进程分配cpu，上例中将8个进程分配到8个cpu，当然可以写多个，或者将一个进程分配到多个cpu。 1worker_cpu_affinity 0001 0010 0011 0100 0101 0110 0111 1000;  配置nginx进程打开">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-06-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-05T07:31:52.613Z">
+<meta property="article:author" content="Well Wang">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2022/06/05/nginx%E9%AB%98%E5%B9%B6%E5%8F%91%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>nginx高并发调优 | Well Wang的blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Well Wang的blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/05/nginx%E9%AB%98%E5%B9%B6%E5%8F%91%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Well Wang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Well Wang的blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          nginx高并发调优
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-06-05 00:00:00 / 修改时间：15:31:52" itemprop="dateCreated datePublished" datetime="2022-06-05T00:00:00+08:00">2022-06-05</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>一、nigxin配置文件优化</p>
+<p>设置nginx进程数，推荐按照cpu数目来指定，一般跟cpu核数相同。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">worker_processes 8;</span><br></pre></td></tr></table></figure>
+
+<p>为每个进程分配cpu，上例中将8个进程分配到8个cpu，当然可以写多个，或者将一个进程分配到多个cpu。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">worker_cpu_affinity 0001 0010 0011 0100 0101 0110 0111 1000;</span><br></pre></td></tr></table></figure>
+
+<p>配置nginx进程打开的最多文件数目，理论值应该是系统的最多打开文件数（ulimit -n）与nginx进程数相除，但是nginx分配请求并不是那么均匀，所以最好与ulimit -n的值保持一致。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">worker_rlimit_nofile 65535;</span><br></pre></td></tr></table></figure>
+
+<p>使用epoll的I/O模型，用这个模型来高效处理异步事件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">use epoll;</span><br></pre></td></tr></table></figure>
+
+<pre><code>每个进程允许的最多连接数，理论上每台nginx服务器的最大连接数为
+</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">worker_processes*worker_connections。</span><br><span class="line">worker_connections 65535;</span><br></pre></td></tr></table></figure>
+
+<p>http连接超时时间，默认是60s，功能是使客户端到服务器端的连接在设定的时间内持续有效，当出现对服务器的后继请求时，该功能避免了建立或者重新建立连接。切记这个参数也不能设置过大！否则会导致许多无效的http连接占据着nginx的连接数，终nginx崩溃！</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keepalive_timeout 60;</span><br></pre></td></tr></table></figure>
+
+<p>客户端请求头部的缓冲区大小，这个可以根据你的系统分页大小来设置，一般一个请求的头部大小不会超过1k，不过由于一般系统分页都要大于1k，所以这里设置为分页大小。分页大小可以用命令getconf PAGESIZE取得。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client_header_buffer_size 4k;</span><br></pre></td></tr></table></figure>
+
+<p>下面这个参数将为打开文件指定缓存，默认是没有启用的，max指定缓存数量，建议和打开文件数一致，inactive是指经过多长时间文件没被请求后删除缓存。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">open_file_cache max=102400 inactive=20s;</span><br></pre></td></tr></table></figure>
+
+<p>下面这个是指多长时间检查一次缓存的有效信息。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">open_file_cache_valid 30s;</span><br></pre></td></tr></table></figure>
+
+<p>open_file_cache指令中的inactive参数时间内文件的最少使用次数，如果超过这个数字，文件描述符一直是在缓存中打开的，如上例，如果有一个文件在inactive时间内一次没被使用，它将被移除。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">open_file_cache_min_uses 1;</span><br></pre></td></tr></table></figure>
+
+<p>隐藏响应头中的有关操作系统和web server（Nginx）版本号的信息，这样对于安全性是有好处的。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server_tokens off;</span><br></pre></td></tr></table></figure>
+
+<p>可以让sendfile()发挥作用。sendfile()可以在磁盘和TCP socket之间互相拷贝数据(或任意两个文件描述符)。Pre-sendfile是传送数据之前在用户空间申请数据缓冲区。之后用read()将数据从文件拷贝到这个缓冲区，write()将缓冲区数据写入网络。sendfile()是立即将数据从磁盘读到OS缓存。因为这种拷贝是在内核完成的，sendfile()要比组合read()和write()以及打开关闭丢弃缓冲更加有效(更多有关于sendfile)。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sendfile on;</span><br></pre></td></tr></table></figure>
+
+<p>告诉nginx在一个数据包里发送所有头文件，而不一个接一个的发送。就是说数据包不会马上传送出去，等到数据包最大时，一次性的传输出去，这样有助于解决网络堵塞。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcp_nopush on;</span><br></pre></td></tr></table></figure>
+
+<p>告诉nginx不要缓存数据，而是一段一段的发送–当需要及时发送数据时，就应该给应用设置这个属性，这样发送一小块数据信息时就不能立即得到返回值。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">tcp_nodelay on;</span><br><span class="line">比如：</span><br><span class="line">http &#123;undefined</span><br><span class="line">server_tokens off;</span><br><span class="line">sendfile on;</span><br><span class="line">tcp_nopush on;</span><br><span class="line">tcp_nodelay on;</span><br><span class="line">…</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>客户端请求头部的缓冲区大小，这个可以根据系统分页大小来设置，一般一个请求头的大小不会超过1k，不过由于一般系统分页都要大于1k，所以这里设置为分页大小。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client_header_buffer_size 4k;</span><br></pre></td></tr></table></figure>
+
+<p>客户端请求头部的缓冲区大小，这个可以根据系统分页大小来设置，一般一个请求头的大小不会超过1k，不过由于一般系统分页都要大于1k，所以这里设置为分页大小。</p>
+<p>分页大小可以用命令getconf PAGESIZE取得。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@test-huanqiu ~]<span class="comment"># getconf PAGESIZE</span></span><br><span class="line">4096</span><br></pre></td></tr></table></figure>
+
+<p>但也有client_header_buffer_size超过4k的情况，但是client_header_buffer_size该值必须设置为“系统分页大小”的整倍数。<br>为打开文件指定缓存，默认是没有启用的，max 指定缓存数量，建议和打开文件数一致，inactive 是指经过多长时间文件没被请求后删除缓存。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">open_file_cache max=65535 inactive=60s;</span><br></pre></td></tr></table></figure>
+
+<p>open_file_cache 指令中的inactive 参数时间内文件的最少使用次数，如果超过这个数字，文件描述符一直是在缓存中打开的，如上例，如果有一个文件在inactive 时间内一次没被使用，它将被移除。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">open_file_cache_min_uses 1;</span><br></pre></td></tr></table></figure>
+
+<p>指定多长时间检查一次缓存的有效信息。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">open_file_cache_valid 80s;</span><br></pre></td></tr></table></figure>
+
+<p>========================================================================<br>如下一个运维日常用的nginx标准配置文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line">[root@dev-huanqiu ~]<span class="comment"># cat /usr/local/nginx/conf/nginx.conf</span></span><br><span class="line">user   www www;</span><br><span class="line">worker_processes 8;</span><br><span class="line">worker_cpu_affinity 00000001 00000010 00000100 00001000 00010000 00100000 01000000;</span><br><span class="line">error_log   /www/log/nginx_error.log   crit;</span><br><span class="line">pid         /usr/local/nginx/nginx.pid;</span><br><span class="line">worker_rlimit_nofile 65535;</span><br><span class="line"></span><br><span class="line">events</span><br><span class="line">&#123;</span><br><span class="line">   use epoll;</span><br><span class="line">   worker_connections 65535;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">http</span><br><span class="line">&#123;</span><br><span class="line">   include       mime.types;</span><br><span class="line">   default_type   application/octet-stream;</span><br><span class="line"></span><br><span class="line">   charset   utf-8;</span><br><span class="line"></span><br><span class="line">   server_names_hash_bucket_size 128;</span><br><span class="line">   client_header_buffer_size 2k;</span><br><span class="line">   large_client_header_buffers 4 4k;</span><br><span class="line">   client_max_body_size 8m;</span><br><span class="line"></span><br><span class="line">   sendfile on;</span><br><span class="line">   tcp_nopush     on;</span><br><span class="line"></span><br><span class="line">   keepalive_timeout 60;</span><br><span class="line"></span><br><span class="line">   fastcgi_cache_path /usr/local/nginx/fastcgi_cache levels=1:2</span><br><span class="line">                 keys_zone=TEST:10m</span><br><span class="line">                 inactive=5m;</span><br><span class="line">   fastcgi_connect_timeout 300;</span><br><span class="line">   fastcgi_send_timeout 300;</span><br><span class="line">   fastcgi_read_timeout 300;</span><br><span class="line">   fastcgi_buffer_size 16k;</span><br><span class="line">   fastcgi_buffers 16 16k;</span><br><span class="line">   fastcgi_busy_buffers_size 16k;</span><br><span class="line">   fastcgi_temp_file_write_size 16k;</span><br><span class="line">   fastcgi_cache TEST;</span><br><span class="line">   fastcgi_cache_valid 200 302 1h;</span><br><span class="line">   fastcgi_cache_valid 301 1d;</span><br><span class="line">   fastcgi_cache_valid any 1m;</span><br><span class="line">   fastcgi_cache_min_uses 1;</span><br><span class="line">   fastcgi_cache_use_stale error <span class="built_in">timeout</span> invalid_header http_500;</span><br><span class="line">   open_file_cache max=204800 inactive=20s;</span><br><span class="line">   open_file_cache_min_uses 1;</span><br><span class="line">   open_file_cache_valid 30s;</span><br><span class="line"></span><br><span class="line">   tcp_nodelay on;</span><br><span class="line"></span><br><span class="line">   gzip on;</span><br><span class="line">   gzip_min_length   1k;</span><br><span class="line">   gzip_buffers     4 16k;</span><br><span class="line">   gzip_http_version 1.0;</span><br><span class="line">   gzip_comp_level 2;</span><br><span class="line">   gzip_types       text/plain application/x-javascript text/css application/xml;</span><br><span class="line">   gzip_vary on;</span><br><span class="line"></span><br><span class="line">   server</span><br><span class="line">   &#123;</span><br><span class="line">     listen       8080;</span><br><span class="line">     server_name   huan.wangshibo.com;</span><br><span class="line">     index index.php index.htm;</span><br><span class="line">     root   /www/html/;</span><br><span class="line"></span><br><span class="line">     location /status</span><br><span class="line">     &#123;</span><br><span class="line">         stub_status on;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     location ~ .*\.(php|php5)?$</span><br><span class="line">     &#123;</span><br><span class="line">         fastcgi_pass 127.0.0.1:9000;</span><br><span class="line">         fastcgi_index index.php;</span><br><span class="line">         include fcgi.conf;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|js|css)$</span><br><span class="line">     &#123;</span><br><span class="line">       expires       30d;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     log_format   access   <span class="string">&#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span></span><br><span class="line">               <span class="string">&#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span></span><br><span class="line">               <span class="string">&#x27;&quot;$http_user_agent&quot; $http_x_forwarded_for&#x27;</span>;</span><br><span class="line">     access_log   /www/log/access.log   access;</span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="二、关于FastCGI的几个指令"><a href="#二、关于FastCGI的几个指令" class="headerlink" title="二、关于FastCGI的几个指令"></a>二、关于FastCGI的几个指令</h4><p>这个指令为FastCGI缓存指定一个路径，目录结构等级，关键字区域存储时间和非活动删除时间。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fastcgi_cache_path /usr/local/nginx/fastcgi_cache levels=1:2 keys_zone=TEST:10m inactive=5m;</span><br></pre></td></tr></table></figure>
+
+<p>指定连接到后端FastCGI的超时时间。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fastcgi_connect_timeout 300;</span><br></pre></td></tr></table></figure>
+
+<p>向FastCGI传送请求的超时时间，这个值是指已经完成两次握手后向FastCGI传送请求的超时时间。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fastcgi_send_timeout 300;</span><br></pre></td></tr></table></figure>
+
+<p>接收FastCGI应答的超时时间，这个值是指已经完成两次握手后接收FastCGI应答的超时时间。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fastcgi_read_timeout 300;</span><br></pre></td></tr></table></figure>
+
+<p>指定读取FastCGI应答第一部分 需要用多大的缓冲区，这里可以设置为fastcgi_buffers指令指定的缓冲区大小，上面的指令指定它将使用1个 16k的缓冲区去读取应答的第一部分，即应答头，其实这个应答头一般情况下都很小（不会超过1k），但是你如果在fastcgi_buffers指令中指 定了缓冲区的大小，那么它也会分配一个fastcgi_buffers指定的缓冲区大小去缓存。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fastcgi_buffer_size 16k;</span><br></pre></td></tr></table></figure>
+
+<p>指定本地需要用多少和多大的缓冲区来 缓冲FastCGI的应答，如上所示，如果一个php脚本所产生的页面大小为256k，则会为其分配16个16k的缓冲区来缓存，如果大于256k，增大 于256k的部分会缓存到fastcgi_temp指定的路径中， 当然这对服务器负载来说是不明智的方案，因为内存中处理数据速度要快于硬盘，通常这个值 的设置应该选择一个你的站点中的php脚本所产生的页面大小的中间值，比如你的站点大部分脚本所产生的页面大小为 256k就可以把这个值设置为16 16k，或者4 64k 或者64 4k，但很显然，后两种并不是好的设置方法，因为如果产生的页面只有32k，如果用4 64k它会分配1个64k的缓冲区去缓存，而如果使用64 4k它会分配8个4k的缓冲区去缓存，而如果使用16 16k则它会分配2个16k去缓存页面，这样看起来似乎更加合理。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fastcgi_buffers 16 16k;</span><br></pre></td></tr></table></figure>
+
+<p>这个指令我也不知道是做什么用，只知道默认值是fastcgi_buffers的两倍。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fastcgi_busy_buffers_size 32k;</span><br></pre></td></tr></table></figure>
+
+<p>在写入fastcgi_temp_path时将用多大的数据块，默认值是fastcgi_buffers的两倍。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fastcgi_temp_file_write_size 32k;</span><br></pre></td></tr></table></figure>
+
+<p>开启FastCGI缓存并且为其制定一个名称。个人感觉开启缓存非常有用，可以有效降低CPU负载，并且防止502错误。但是这个缓存会引起很多问题，因为它缓存的是动态页面。具体使用还需根据自己的需求。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fastcgi_cache TEST</span><br></pre></td></tr></table></figure>
+
+<p>为指定的应答代码指定缓存时间，如上例中将200，302应答缓存一小时，301应答缓存1天，其他为1分钟。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fastcgi_cache_valid 200 302 1h;</span><br><span class="line">fastcgi_cache_valid 301 1d;</span><br><span class="line">fastcgi_cache_valid any 1m;</span><br></pre></td></tr></table></figure>
+
+<p>缓存在fastcgi_cache_path指令inactive参数值时间内的最少使用次数，如上例，如果在5分钟内某文件1次也没有被使用，那么这个文件将被移除。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fastcgi_cache_min_uses 1;</span><br></pre></td></tr></table></figure>
+
+<p>不知道这个参数的作用，猜想应该是让nginx知道哪些类型的缓存是没用的。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fastcgi_cache_use_stale error <span class="built_in">timeout</span> invalid_header http_500;</span><br></pre></td></tr></table></figure>
+
+<p>注：，*FastCGI自身也有一些配置需要进行优化，如果你使用php-fpm来管理FastCGI，可以修改配置文件中的以下值：<br>同时处理的并发请求数，即它将开启最多60个子线程来处理并发连接。<br>60<br>最多打开文件数。<br>65535<br>每个进程在重置之前能够执行的最多请求数。<br>65535</p>
+<h4 id="三-关于内核参数的优化，在-etc-sysctl-conf文件内"><a href="#三-关于内核参数的优化，在-etc-sysctl-conf文件内" class="headerlink" title="三. 关于内核参数的优化，在/etc/sysctl.conf文件内"></a>三. 关于内核参数的优化，在/etc/sysctl.conf文件内</h4><ol>
+<li>timewait的数量，默认是180000。(Deven:因此如果想把timewait降下了就要把tcp_max_tw_buckets值减小)<br> net.ipv4.tcp_max_tw_buckets = 6000</li>
+<li>允许系统打开的端口范围。<br> net.ipv4.ip_local_port_range = 1024 65000</li>
+<li>启用TIME-WAIT状态sockets快速回收功能;用于快速减少在TIME-WAIT状态TCP连接数。1表示启用;0表示关闭。但是要特别留意的是：这个选项一般不推荐启用，因为在NAT(Network Address Translation)网络下，会导致大量的TCP连接建立错误，从而引起网站访问故障。<br> net.ipv4.tcp_tw_recycle = 0</li>
+</ol>
+<p>实际上，net.ipv4.tcp_tw_recycle功能的开启，一般需要net.ipv4.tcp_timestamps（一般系统默认是开启这个功能的）这个开关开启后才有效果；<br>当tcp_tw_recycle 开启时（tcp_timestamps 同时开启，快速回收 socket 的效果达到），对于位于NAT设备后面的 Client来说，是一场灾难！！会导致到NAT设备后面的Client连接Server不稳定（有的 Client 能连接 server，有的 Client 不能连接 server）。</p>
+<p>tcp_tw_recycle这个功能，其实是为内部网络（网络环境自己可控 ” -不存在NAT 的情况）设计的，对于公网环境下，不宜使用。通常来说，回收TIME_WAIT状态的socket是因为“无法主动连接远端”，因为无可用的端口，而不应该是要回收内存（没有必要）。也就是说，需求是Client的需求，Server会有“端口不够用”的问题吗？除非是前端机，需要大量的连接后端服务，也就是充当着Client的角色。</p>
+<p>正确的解决这个总是办法应该是</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">net.ipv4.ip_local_port_range = 9000 6553            <span class="comment">#默认值范围较小</span></span><br><span class="line">net.ipv4.tcp_max_tw_buckets = 10000                 <span class="comment">#默认值较小，还可适当调小</span></span><br><span class="line">net.ipv4.tcp_tw_reuse = 1</span><br><span class="line">net.ipv4.tcp_fin_timeout = 10</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>开启重用功能，允许将TIME-WAIT状态的sockets重新用于新的TCP连接。这个功能启用是安全的，一般不要去改动！<br> net.ipv4.tcp_tw_reuse = 1</li>
+<li>开启SYN Cookies，当出现SYN等待队列溢出时，启用cookies来处理。<br> net.ipv4.tcp_syncookies = 1</li>
+<li>web应用中listen函数的backlog默认会给我们内核参数的net.core.somaxconn限制到128，而nginx定义的NGX_LISTEN_BACKLOG默认为511，所以有必要调整这个值。<br> net.core.somaxconn = 262144</li>
+<li>每个网络接口接收数据包的速率比内核处理这些包的速率快时，允许送到队列的数据包的最大数目。<br> net.core.netdev_max_backlog = 262144</li>
+<li>系统中最多有多少个TCP套接字不被关联到任何一个用户文件句柄上。如果超过这个数字，孤儿连接将即刻被复位并打印出警告信息。这个限制仅仅是为了防止简单的DoS攻击，不能过分依靠它或者人为地减小这个值，更应该增加这个值(如果增加了内存之后)。<br> net.ipv4.tcp_max_orphans = 262144</li>
+<li>记录的那些尚未收到客户端确认信息的连接请求的最大值。对于有128M内存的系统而言，缺省值是1024，小内存的系统则是128。<br> net.ipv4.tcp_max_syn_backlog = 262144</li>
+<li>时间戳可以避免序列号的卷绕。一个1Gbps的链路肯定会遇到以前用过的序列号。时间戳能够让内核接受这种“异常”的数据包。<br>net.ipv4.tcp_timestamps = 1</li>
+<li>有不少服务器为了提高性能，开启net.ipv4.tcp_tw_recycle选项，在NAT网络环境下，容易导致网站访问出现了一些connect失败的问题。<br>个人建议：<br>关闭net.ipv4.tcp_tw_recycle选项，而不是net.ipv4.tcp_timestamps；因为在net.ipv4.tcp_timestamps关闭的条件下，开启net.ipv4.tcp_tw_recycle是不起作用的；而net.ipv4.tcp_timestamps可以独立开启并起作用。</li>
+<li>为了打开对端的连接，内核需要发送一个SYN并附带一个回应前面一个SYN的ACK。也就是所谓三次握手中的第二次握手。这个设置决定了内核放弃连接之前发送SYN+ACK包的数量。<br>net.ipv4.tcp_synack_retries = 1</li>
+<li>在内核放弃建立连接之前发送SYN包的数量。<br>net.ipv4.tcp_syn_retries = 1</li>
+<li>如果套接字由本端要求关闭，这个参数 决定了它保持在FIN-WAIT-2状态的时间。对端可以出错并永远不关闭连接，甚至意外当机。缺省值是60秒。2.2 内核的通常值是180秒，你可以按这个设置，但要记住的是，即使你的机器是一个轻载的WEB服务器，也有因为大量的死套接字而内存溢出的风险，FIN- WAIT-2的危险性比FIN-WAIT-1要小，因为它最多只能吃掉1.5K内存，但是它们的生存期长些。<br>net.ipv4.tcp_fin_timeout = 30</li>
+<li>当keepalive起用的时候，TCP发送keepalive消息的频度。缺省是2小时。<br>net.ipv4.tcp_keepalive_time = 30<br>以下是一个常用的内核参数的标准配置</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">[root@dev-huanqiu ~]<span class="comment"># cat /etc/sysctl.conf</span></span><br><span class="line">net.ipv4.ip_forward = 0</span><br><span class="line">net.ipv4.conf.default.rp_filter = 1</span><br><span class="line">net.ipv4.conf.default.accept_source_route = 0</span><br><span class="line">kernel.sysrq = 0</span><br><span class="line">kernel.core_uses_pid = 1</span><br><span class="line">net.ipv4.tcp_syncookies = 1            //这四行标红内容，一般是发现大量TIME_WAIT时的解决办法</span><br><span class="line">kernel.msgmnb = 65536</span><br><span class="line">kernel.msgmax = 65536</span><br><span class="line">kernel.shmmax = 68719476736</span><br><span class="line">kernel.shmall = 4294967296</span><br><span class="line">net.ipv4.tcp_max_tw_buckets = 6000</span><br><span class="line">net.ipv4.tcp_sack = 1</span><br><span class="line">net.ipv4.tcp_window_scaling = 1</span><br><span class="line">net.ipv4.tcp_rmem = 4096 87380 4194304</span><br><span class="line">net.ipv4.tcp_wmem = 4096 16384 4194304</span><br><span class="line">net.core.wmem_default = 8388608</span><br><span class="line">net.core.rmem_default = 8388608</span><br><span class="line">net.core.rmem_max = 16777216</span><br><span class="line">net.core.wmem_max = 16777216</span><br><span class="line">net.core.netdev_max_backlog = 262144</span><br><span class="line">net.core.somaxconn = 262144</span><br><span class="line">net.ipv4.tcp_max_orphans = 3276800</span><br><span class="line">net.ipv4.tcp_max_syn_backlog = 262144</span><br><span class="line">net.ipv4.tcp_timestamps = 1            //在net.ipv4.tcp_tw_recycle设置为1的时候，这个选择最好加上</span><br><span class="line">net.ipv4.tcp_synack_retries = 1</span><br><span class="line">net.ipv4.tcp_syn_retries = 1</span><br><span class="line">net.ipv4.tcp_tw_recycle = 1           //开启此功能可以减少TIME-WAIT状态，但是NAT网络模式下打开有可能会导致tcp连接错误，慎重。</span><br><span class="line">net.ipv4.tcp_tw_reuse = 1</span><br><span class="line">net.ipv4.tcp_mem = 94500000 915000000 927000000</span><br><span class="line">net.ipv4.tcp_fin_timeout = 30</span><br><span class="line">net.ipv4.tcp_keepalive_time = 30</span><br><span class="line">net.ipv4.ip_local_port_range = 1024 65000</span><br><span class="line">net.ipv4.ip_conntrack_max = 6553500</span><br></pre></td></tr></table></figure>
+
+<p><strong>注：</strong><br> net.ipv4.tcp_tw_recycle = 1 这个功能打开后，确实能减少TIME-WAIT状态，但是打开这个参数后，会导致大量的TCP连接建立错误，从而引起网站访问故障。</p>
+<p>Nginx安全配置小提示</p>
+<p>下面是一个常见安全陷阱和解决方案的列表，它可以辅助来确保你的Nginx部署是安全的。</p>
+<ol>
+<li> 禁用autoindex模块。这个可能在你使用的Nginx版本中已经更改了，如果没有的话只需在配置文件的location块中增加autoindex off;声明即可。</li>
+<li> 禁用服务器上的ssi (服务器端引用)。这个可以通过在location块中添加ssi off; 。</li>
+<li> 关闭服务器标记。如果开启的话（默认情况下）所有的错误页面都会显示服务器的版本和信息。将server_tokens off;声明添加到Nginx配置文件来解决这个问题。</li>
+<li> 在配置文件中设置自定义缓存以限制缓冲区溢出攻击的可能性。</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">client_body_buffer_size  1K;</span><br><span class="line">client_header_buffer_size 1k;</span><br><span class="line">client_max_body_size 1k;</span><br><span class="line">large_client_header_buffers 2 1k;</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li> 将timeout设低来防止DOS攻击。所有这些声明都可以放到主配置文件中</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">client_body_timeout   10;</span><br><span class="line">client_header_timeout 10;</span><br><span class="line">keepalive_timeout     65;</span><br><span class="line">send_timeout          10;</span><br></pre></td></tr></table></figure>
+
+<ol start="6">
+<li> 限制用户连接数来预防DOS攻击。</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">limit_zone slimits <span class="variable">$binary_remote_addr</span> 5m;</span><br><span class="line">limit_conn slimits 5;</span><br></pre></td></tr></table></figure>
+
+<ol start="7">
+<li> 试着避免使用HTTP认证。HTTP认证默认使用crypt，它的哈希并不安全。如果你要用的话就用MD5（这也不是个好选择但负载方面比crypt好）</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/06/05/service/" rel="prev" title="server服务教程">
+      <i class="fa fa-chevron-left"></i> server服务教程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/06/05/nginx%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90/" rel="next" title="nginx配置文件">
+      nginx配置文件 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%85%B3%E4%BA%8EFastCGI%E7%9A%84%E5%87%A0%E4%B8%AA%E6%8C%87%E4%BB%A4"><span class="nav-number">1.</span> <span class="nav-text">二、关于FastCGI的几个指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89-%E5%85%B3%E4%BA%8E%E5%86%85%E6%A0%B8%E5%8F%82%E6%95%B0%E7%9A%84%E4%BC%98%E5%8C%96%EF%BC%8C%E5%9C%A8-etc-sysctl-conf%E6%96%87%E4%BB%B6%E5%86%85"><span class="nav-number">2.</span> <span class="nav-text">三. 关于内核参数的优化，在&#x2F;etc&#x2F;sysctl.conf文件内</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Well Wang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Well Wang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

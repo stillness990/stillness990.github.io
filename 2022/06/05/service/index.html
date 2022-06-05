@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="常用命令12sudo systemctl start &lt;服务名&gt; #启动服务sudo systemctl status &lt;服务名&gt; #查看服务状态  执行服务命令后输出如下 1234567891011121314151617httpd.service - The Apache HTTP Server   Loaded: loaded (&#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;sy">
+<meta property="og:type" content="article">
+<meta property="og:title" content="server服务教程">
+<meta property="og:url" content="http://example.com/2022/06/05/service/index.html">
+<meta property="og:site_name" content="Well Wang的blog">
+<meta property="og:description" content="常用命令12sudo systemctl start &lt;服务名&gt; #启动服务sudo systemctl status &lt;服务名&gt; #查看服务状态  执行服务命令后输出如下 1234567891011121314151617httpd.service - The Apache HTTP Server   Loaded: loaded (&#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;sy">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-06-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-05T07:32:08.316Z">
+<meta property="article:author" content="Well Wang">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2022/06/05/service/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>server服务教程 | Well Wang的blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Well Wang的blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/05/service/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Well Wang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Well Wang的blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          server服务教程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-06-05 00:00:00 / 修改时间：15:32:08" itemprop="dateCreated datePublished" datetime="2022-06-05T00:00:00+08:00">2022-06-05</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h4 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl start &lt;服务名&gt; <span class="comment">#启动服务</span></span><br><span class="line">sudo systemctl status &lt;服务名&gt; <span class="comment">#查看服务状态</span></span><br></pre></td></tr></table></figure>
+
+<p>执行服务命令后输出如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">httpd.service - The Apache HTTP Server</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled)</span><br><span class="line">   Active: active (running) since  2014-12-05 12:18:22 JST; 7min ago</span><br><span class="line"> Main PID: 4349 (httpd)</span><br><span class="line">   Status: <span class="string">&quot;Total requests: 1; Current requests/sec: 0; Current traffic:   0 B/sec&quot;</span></span><br><span class="line">   CGroup: /system.slice/httpd.service</span><br><span class="line">           ├─4349 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">           ├─4350 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">           ├─4351 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">           ├─4352 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">           ├─4353 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line">           └─4354 /usr/sbin/httpd -DFOREGROUND</span><br><span class="line"></span><br><span class="line">12月 05 12:18:22 localhost.localdomain systemd[1]: Starting The Apache HTTP Server...</span><br><span class="line">12月 05 12:18:22 localhost.localdomain systemd[1]: Started The Apache HTTP Server.</span><br><span class="line">12月 05 12:22:40 localhost.localdomain systemd[1]: Started The Apache HTTP Server.</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Loaded行：配置文件的位置，是否设为开机启动</li>
+<li>Active行：表示正在运行</li>
+<li>Main PID行：主进程ID</li>
+<li>Status行：由应用本身（这里是 httpd ）提供的软件当前状态</li>
+<li>CGroup块：应用的所有子进程</li>
+<li>日志块：应用的日志</li>
+</ul>
+<h5 id="开机启动"><a href="#开机启动" class="headerlink" title="开机启动"></a>开机启动</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl <span class="built_in">enable</span> &lt;服务名&gt; <span class="comment">#开机启动</span></span><br></pre></td></tr></table></figure>
+
+<p>相当于在/etc/systemd/system目录添加一个链接，指向/usr/lib/systemd/system里面的httpd.service文件。这是因为开机时，Systemd只执行/etc/systemd/system目录里面的配置文件。这也意味着，如果把修改后的配置文件放在该目录，就可以达到覆盖原始配置的效果。</p>
+<h5 id="停止服务"><a href="#停止服务" class="headerlink" title="停止服务"></a>停止服务</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl stop &lt;服务名&gt; <span class="comment">#停止服务</span></span><br></pre></td></tr></table></figure>
+
+<p>有时候，该命令可能没有响应，服务停不下来。这时候就不得不”杀进程”了，向正在运行的进程发出kill信号。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl <span class="built_in">kill</span> httpd.service</span><br></pre></td></tr></table></figure>
+
+<p>如果由于某种原因多次运行nginx怎么办。  我们怎么获取将PID？</p>
+<p>systemd知道服务的PID，通过$MAINPID变量 我们可以获取到。</p>
+<p>环境变量 $MAINPID 可用于表示主进程的PID， 例如可以这样使用：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">ExecReload=/bin/kill -HUP $MAINPID</span><br><span class="line">````</span><br><span class="line"></span><br><span class="line">注意，像上例那样，通过向守护进程发送复位信号， 强制其重新加载配置文件，并不是一个好习惯。</span><br><span class="line"></span><br><span class="line"> 因为这是一个异步操作， 所以不适用于需要按照特定顺序重新加载配置文件的服务。</span><br><span class="line"></span><br><span class="line">我们强烈建议将 ExecReload= 设为一个 能够确保重新加载配置文件的操作同步完成的命令行</span><br><span class="line"></span><br><span class="line">![](/ssd/网站/img/220207-1.jpeg)</span><br><span class="line"></span><br><span class="line">![](/ssd/网站/img/220207-2.jpeg)</span><br><span class="line"></span><br><span class="line">```bash</span><br><span class="line">kill -s KILL pid #强制执行 同kill-9 pid</span><br></pre></td></tr></table></figure>
+
+<p>这是一个强大和危险的命令迫使进程在运行是突然终止，进程在结束后不能自我清理</p>
+<h5 id="重启服务"><a href="#重启服务" class="headerlink" title="重启服务"></a>重启服务</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl restart httpd.service</span><br></pre></td></tr></table></figure>
+
+<h4 id="service文件编写"><a href="#service文件编写" class="headerlink" title="service文件编写"></a>service文件编写</h4><blockquote>
+<p>   一个服务怎么启动，完全由它的配置文件决定。下面就来看，配置文件有些什么内容。</p>
+</blockquote>
+<pre><code>前面说过，配置文件主要放在/usr/lib/systemd/system目录，也可能在/etc/systemd/system目录。找到配置文件以后，使用文本编辑器打开即可。
+</code></pre>
+<p>  systemctl cat命令可以用来查看配置文件，下面以sshd.service文件为例，它的作用是启动一个 SSH 服务器，供其他用户以 SSH 方式登录。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=OpenSSH server daemon</span><br><span class="line">Documentation=man:sshd(8) man:sshd_config(5)</span><br><span class="line">After=network.target sshd-keygen.service</span><br><span class="line">Wants=sshd-keygen.service</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">EnvironmentFile=/etc/sysconfig/sshd</span><br><span class="line">ExecStart=/usr/sbin/sshd -D <span class="variable">$OPTIONS</span></span><br><span class="line">ExecReload=/bin/kill -HUP <span class="variable">$MAINPID</span></span><br><span class="line">Type=simple</span><br><span class="line">KillMode=process</span><br><span class="line">Restart=on-failure</span><br><span class="line">RestartSec=42s</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+<p>可以看到，配置文件分成几个区块，每个区块包含若干条键值对。<br>下面依次解释每个区块的内容。</p>
+<h5 id="1-Unit"><a href="#1-Unit" class="headerlink" title="1. [Unit]"></a>1. [Unit]</h5><p>第一个区块，定义Unit元数据信息以及与其他服务的依赖关系<br>Description字段给出当前服务的简单描述，<br>Documentation字段给出文档位置。</p>
+<ul>
+<li><p>Description：服务描述信息</p>
+</li>
+<li><p>Documentation：服务文档地址(可选)</p>
+</li>
+<li><p>Before：如果该字段指定了其它Unit则代表该Unit需要在其它Unit启动之前启动，但是没有严格的依赖关系</p>
+</li>
+<li><p>After：如果该字段有指定了其它Unit则代表该Unit需要在其它Unit启动之后才能启动，但是没有严格的依赖关系</p>
+<blockquote>
+<p>注意，After和Before字段只涉及启动顺序，不涉及依赖关系。</p>
+</blockquote>
+</li>
+</ul>
+<blockquote>
+<p>设置依赖关系，需要使用Wants字段和Requires字段。</p>
+</blockquote>
+<ul>
+<li><p>Wants：与当前Unit配合的其他Unit，存在”弱依赖”关系,如果需要配合的Unit没有运行，当前Unit也能正常启动,</p>
+</li>
+<li><p>Requires：为当前Unit指定一个强依赖关系，如果该配置项所指定的Unit没有运行，则当前Unit无法启动。</p>
+<blockquote>
+<p>Wants字段与Requires字段只涉及依赖关系，与启动顺序无关，默认情况下是同时启动的。</p>
+</blockquote>
+</li>
+<li><p>BindsTo：与Requires类似，如果指定的Unit发生退出，则当前Unit也会停止运行</p>
+</li>
+<li><p>Conflicts：指定冲突Unit，这里指定的Unit不能与当前Unit同时运行</p>
+</li>
+<li><p>Condition：当前Unit运行必须满足的条件，否则不会运行</p>
+</li>
+</ul>
+<blockquote>
+<p>关于Requires、After、Conflicts依赖的说明：<br>如果没有配置DefaultDependencies=no，那么该Unit会自动隐式添加Requires=sysinit.target, After=sysinit.target,After=basic.target, Conflicts=shutdown.target, Before=shutdown.target的依赖关系。这样是为了保证普通Unit在系统启动完毕之后才能启动、在关闭系统之前先被停止，只有需要在系统启动早期就必须启动的服务以及那些必须在关机动作的结尾才能停止的服务才需要设置DefaultDependencies=no。</p>
+</blockquote>
+<h5 id="2-Service"><a href="#2-Service" class="headerlink" title="2.[Service]"></a>2.[Service]</h5><p>通过该区域进行详细配置，如服务启动脚本、环境变量、配置文件名、重启方式等</p>
+<p>许多软件都有自己的环境参数文件，该文件可以用EnvironmentFile字段读取。<br>EnvironmentFile字段：指定当前服务的环境参数文件。该文件内部的key=value键值对，可以用$key的形式，在当前配置文件中获取。<br>上面的例子中，sshd 的环境参数文件是/etc/sysconfig/sshd。</p>
+<p>启动类型</p>
+<ul>
+<li><p>Type=simple：默认值，直接执行ExecStart选项所指定的命令ExecStart字段启动的进程为主进程</p>
+</li>
+<li><p>Type=forking：多数服务会在启动后放入后台，systemd通过Type=forking来支持这种工作方式。如果启用该项，建议同时设置PIDFile选项，这样可以帮助systemd更准确的定位到服务进程ExecStart字段将以fork()方式启动，此时父进程将会退出，子进程将成为主进程</p>
+</li>
+<li><p>Type=notify：确保服务启动后发送一个通知消息给systemd，systemd会在启动后面的服务之前确保该进程已经成功的发送了这个消息</p>
+</li>
+<li><p>Type=idle：若同时有其他任务在执行，需要等那些任务完成后才对当前服务进行处理<br>oneshot：类似于simple，但只执行一次，Systemd 会等它执行完，才启动其他服务</p>
+<blockquote>
+<p>下面是一个oneshot的例子，笔记本电脑启动时，要把触摸板关掉，配置文件可以这样写。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=Switch-off Touchpad</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=oneshot</span><br><span class="line">ExecStart=/usr/bin/touchpad-off</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>上面的配置文件，启动类型设为oneshot，就表明这个服务只要运行一次就够了，不需要长期运行。</p>
+</blockquote>
+</li>
+<li><p>dbus：类似于simple，但会等待 D-Bus 信号后启动<br>notify：类似于simple，启动结束后会发出通知信号，然后Systemd 再启动其他服务</p>
+</li>
+<li><p>PIDFile：配置Unit的PID文件路径，systemd将会在服务启动后从该文件中读取进程PID。建议Type=forking时明确配置该选项。如果设为相对路径表示相对于/run/目录。</p>
+</li>
+</ul>
+<p>启动指令</p>
+<ul>
+<li><p>ExecStart：启动某个服务的具体命令，如果有变量的话则来自Environment所指定的配置文件，在所有的启动命令(Exec开头的命令)设置之前都可以加上一个连词号(-)，表示抑制错误，即发生错误的时候不影响其他命令的执行。比如EnvironmentFile=-/etc/sysconfig/sshd表示即使/etc/sysconfig/sshd文件不存在，也不会抛出错误。</p>
+</li>
+<li><p>ExecStartPre：启动某个服务之前执行的命令</p>
+</li>
+<li><p>ExecStartPost：启动某个服务之后执行的命令</p>
+</li>
+<li><p>ExecReload：重启服务时执行的命令，Unit需要重新载入配置时所执行的命令行，可通过kill命令结合一个环境变量$MAINPID来完成，如/bin/kill -HUP $MAINPID。如果服务有特定的重启命令，建议不要使用kill的方式</p>
+</li>
+<li><p>ExecStop：停止服务时执行的命令，如果没有指定的话则会按照kill的方式终止</p>
+</li>
+<li><p>ExecStopPost：服务停止之后需要执行的命令</p>
+</li>
+<li><p>RestartSec：自动重启当前服务间隔的秒数，如RestartSec=20s代表systemd自动重启之前需要等20秒。</p>
+</li>
+<li><p>Restart：定义Systemd自动重启当前服务的场景，比如always(除了使用命令systemctl stop停止服务，其他情况下都进行重启)、on-success、on-failure(发生意外退出就重启。如果是systemctl stop这种正常停止则不会重启)、on-abnormal、on-abort、on-watchdog</p>
+</li>
+<li><p>RestartPreventExitStatus：指定Unit在什么情况下的退出不需要自动重启，该参数的值支持exit状态码以及信号名2种写法，多个状态以空格分隔</p>
+</li>
+<li><p>TimeoutSec：定义Systemd停止当前服务时需要等待的秒数</p>
+</li>
+<li><p>Environment：指定Unit所需的环境变量，如Environment=”ONE=one”，ExecStart=echo $ONE</p>
+</li>
+<li><p>EnvironmentFile：指定Unit所需的环境变量配置文件，如ssh需要/etc/sysconfig/sshd</p>
+</li>
+</ul>
+<h5 id="3-Install"><a href="#3-Install" class="headerlink" title="3. [Install]"></a>3. [Install]</h5><p>通常是配置文件最后一个区块，定义服务如何启动以及是否开机启动</p>
+<p>默认即可</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>常用</p>
+<ul>
+<li>WantedBy：指定一个或多个Target(Target就是Unit组，启动某个Target的时候会启动里面所有的Unit，它的作用有点类似init的runlevel)，如WantedBy=multi-user.target代表服务所在的 Target是multi-user.target(多用户命令行状态专用Target，也是systemd默认Target)。这个设置比较重要，因为对某个Unit执行enable时，该Unit的软链接就会存放于/etc/systemd/system/multi-user.target.wants目录中(以Target名+.wants后缀构成)</li>
+</ul>
+<p>不常用</p>
+<ul>
+<li><p>RequiredBy：指定一个或多个Target，当Unit状态为enable时，服务的软连接文件会创建到/etc/systemd/system目录下面并以Target 名+.required后缀构成的子目录中</p>
+</li>
+<li><p>Alias：Unit别名</p>
+</li>
+<li><p>Also：当Unit设置为enable时，会被同时enable的其他Unit</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/06/05/syncthing/" rel="prev" title="syncthing同步数据">
+      <i class="fa fa-chevron-left"></i> syncthing同步数据
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/06/05/nginx%E9%AB%98%E5%B9%B6%E5%8F%91%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/" rel="next" title="nginx高并发调优">
+      nginx高并发调优 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">1.</span> <span class="nav-text">常用命令</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8"><span class="nav-number">1.1.</span> <span class="nav-text">开机启动</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%81%9C%E6%AD%A2%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.2.</span> <span class="nav-text">停止服务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E5%90%AF%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.3.</span> <span class="nav-text">重启服务</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#service%E6%96%87%E4%BB%B6%E7%BC%96%E5%86%99"><span class="nav-number">2.</span> <span class="nav-text">service文件编写</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-Unit"><span class="nav-number">2.1.</span> <span class="nav-text">1. [Unit]</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-Service"><span class="nav-number">2.2.</span> <span class="nav-text">2.[Service]</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-Install"><span class="nav-number">2.3.</span> <span class="nav-text">3. [Install]</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Well Wang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Well Wang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="1，新建服务文件每一个服务在Linux有它自己的对应的配置文件，这个文件可以通过文本编辑器编辑，扩展名为xxx.servive（xxx为服务名称）。这些文件位于&#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system目录下。 在这个目录下新建service文件即可创建我们的服务。文件的内容结构如下： 123456789101112[Unit]Description&#x3D;服务描述After&#x3D;服务依赖（再这些服务后">
+<meta property="og:type" content="article">
+<meta property="og:title" content="程序注册为linux系统服务">
+<meta property="og:url" content="http://example.com/2022/06/05/%E5%B0%86%E7%A8%8B%E5%BA%8F%E6%B3%A8%E5%86%8C%E4%B8%BAlinux%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/index.html">
+<meta property="og:site_name" content="Well Wang的blog">
+<meta property="og:description" content="1，新建服务文件每一个服务在Linux有它自己的对应的配置文件，这个文件可以通过文本编辑器编辑，扩展名为xxx.servive（xxx为服务名称）。这些文件位于&#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system目录下。 在这个目录下新建service文件即可创建我们的服务。文件的内容结构如下： 123456789101112[Unit]Description&#x3D;服务描述After&#x3D;服务依赖（再这些服务后">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-06-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-05T07:31:32.202Z">
+<meta property="article:author" content="Well Wang">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2022/06/05/%E5%B0%86%E7%A8%8B%E5%BA%8F%E6%B3%A8%E5%86%8C%E4%B8%BAlinux%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>程序注册为linux系统服务 | Well Wang的blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Well Wang的blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/05/%E5%B0%86%E7%A8%8B%E5%BA%8F%E6%B3%A8%E5%86%8C%E4%B8%BAlinux%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Well Wang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Well Wang的blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          程序注册为linux系统服务
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-06-05 00:00:00 / 修改时间：15:31:32" itemprop="dateCreated datePublished" datetime="2022-06-05T00:00:00+08:00">2022-06-05</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h4 id="1，新建服务文件"><a href="#1，新建服务文件" class="headerlink" title="1，新建服务文件"></a>1，新建服务文件</h4><p>每一个服务在Linux有它自己的对应的配置文件，这个文件可以通过文本编辑器编辑，扩展名为xxx.servive（xxx为服务名称）。这些文件位于/usr/lib/systemd/system目录下。</p>
+<p>在这个目录下新建service文件即可创建我们的服务。文件的内容结构如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=服务描述</span><br><span class="line">After=服务依赖（再这些服务后启动本服务）</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=服务类型</span><br><span class="line">ExecStart=启动命令</span><br><span class="line">ExecStop=终止命令</span><br><span class="line">ExecReload=重启命令</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=服务安装设置</span><br></pre></td></tr></table></figure>
+
+<p>可见服务配置文件分为[Unit]、[Service]和[Install]三大部分。</p>
+<p>一般来说有些值是固定的，没有特殊需要我们直接套用即可。例如[Unit]中After的值一般是：network.target remote-fs.target nss-lookup.target。</p>
+<p>[Install]的WantedBy一般是multi-user.target。</p>
+<p>[Service]中是主要参数。</p>
+<p>Type的值有以下几个：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">simple：这是默认的值，指定了ExecStart设置后，simple就是默认的Type设置除非指定Type。simple使用ExecStart创建的进程作为服务的主进程，在此设置下systemd会立即启动服务。</span><br><span class="line"></span><br><span class="line">forking：如果使用了这个值，则ExecStart的脚本启动后会调用fork()函数创建一个进程作为其启动的一部分。当初始化完成，父进程会退出。子进程会继续作为主进程执行。</span><br><span class="line"></span><br><span class="line">oneshot：类似simple，但是在systemd启动之前，进程就会退出。这是一次性的行为。可能还需要设置RemainAfterExit=yes，以便systemd认为j进程退出后仍然处于激活状态。</span><br><span class="line"></span><br><span class="line">dbus：也和simple很相似，该配置期待或设置一个name值，通过设置BusName=设置name即可。</span><br><span class="line"></span><br><span class="line">notify：同样地，与simple相似的配置。顾名思义，该设置会在守护进程启动的时候发送推送消息。</span><br></pre></td></tr></table></figure>
+<p>其实常用的就是simple和forking了。一般来说我们的程序是应用程序前台使用就用simple，后台/守护进程一般是forking。</p>
+<p>然后就是启动/停止/重启命令，注意这个命令里面调用的程序必须全部使用绝对路径。</p>
+<p>例如，我的服务器上的redis的Service配置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=syncthing</span><br><span class="line">After=network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=simple</span><br><span class="line">User=<span class="built_in">arch</span></span><br><span class="line">ExecStart=/usr/bin/syncthing</span><br><span class="line">ExecStop=<span class="built_in">kill</span> -9 $(pidof syncthing)</span><br><span class="line">ExecReload=<span class="built_in">kill</span> -9 $(pidof syncthing) &amp;&amp; /usr/bin/syncthing</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>kill -9 $(pidof syncthing)命令的意思是：先用pidof命令获取指定名称进程的pid再把这个结果传给kill命令终止对应进程。平时终止特定名称的进程时也可以这么写。</p>
+<p>其实除此之外，service文件还有很多配置项，这里只写出了常用必要的，满足日常需求，其余可以自行搜索学习，这里不再过多赘述。</p>
+<h4 id="2-启动-停止-重启服务"><a href="#2-启动-停止-重启服务" class="headerlink" title="2. 启动/停止/重启服务"></a>2. 启动/停止/重启服务</h4><p>刚刚建立好了我们的服务配置，现在就可以使用了！在此之前需要先使用下列命令让系统重新读取所有服务文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload <span class="comment">#修改service文件后必须先重新加载一遍</span></span><br></pre></td></tr></table></figure>
+
+<p>然后通过以下命令操控服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动服务</span></span><br><span class="line"></span><br><span class="line">systemctl start &lt;服务名&gt;.service</span><br><span class="line"><span class="comment"># 终止服务</span></span><br><span class="line"></span><br><span class="line">systemctl stop &lt;服务名&gt;.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启服务</span></span><br><span class="line"></span><br><span class="line">systemctl restart &lt;服务名&gt;.service</span><br></pre></td></tr></table></figure>
+
+<p>我的服务文件是redis-server.service，那么我的服务名是redis-server。</p>
+<p>其实我们执行启动服务命令时，就会执行我们刚刚配置文件中ExecStart的值的命令，同样终止、重启会对应执行配置文件中ExecStop、ExecReload的值的命令。</p>
+<h4 id="3-开机自动启动"><a href="#3-开机自动启动" class="headerlink" title="3. 开机自动启动"></a>3. 开机自动启动</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启用开机自启</span></span><br><span class="line">systemctl <span class="built_in">enable</span> 服务名</span><br><span class="line"><span class="comment"># Created symlink /etc/systemd/system/multi-user.target.wants/syncthing.service → /usr/lib/systemd/system/syncthing.service.</span></span><br><span class="line">这里在/etc/systemd/system/multi-user.target.wants/目录下创建了一个/usr/lib/systemd/system/syncthing.service文件的软链接，到这里设置开机自启动就完成了。</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 禁用开机自启</span></span><br><span class="line">systemctl <span class="built_in">disable</span> 服务名</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Description：运行软件描述</span><br><span class="line">Documentation：软件的文档</span><br><span class="line">After：因为软件的启动通常依赖于其他软件，这里是指定在哪个服务被启动之后再启动，设置优先级</span><br><span class="line">Wants：弱依赖于某个服务，目标服务的运行状态可以影响到本软件但不会决定本软件运行状态</span><br><span class="line">Requires：强依赖某个服务，目标服务的状态可以决定本软件运行。</span><br><span class="line">ExecStart：执行命令</span><br><span class="line">ExecStop：停止执行命令</span><br><span class="line">ExecReload：重启时的命令</span><br><span class="line">Type：软件运行方式，默认为simple</span><br><span class="line">WantedBy：这里相当于设置软件，选择运行在linux的哪个运行级别，只是在systemd中不在有运行级别概念，但是这里权当这么理解。  </span><br></pre></td></tr></table></figure>
+
+<p>系统服务未启动</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">× syncthing.service - syncthing</span><br><span class="line">     Loaded: loaded (/usr/lib/systemd/system/syncthing.service; enabled; vendor preset: disabled)</span><br><span class="line">     Active: failed (Result: exit-code) since Sat 2022-02-05 19:37:28 CST; 1min 6s ago</span><br><span class="line">   Main PID: 5150 (code=exited, status=0/SUCCESS)</span><br></pre></td></tr></table></figure>
+
+<p>系统服务正常启动</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">syncthing.service - syncthing</span><br><span class="line">    Loaded: loaded (/usr/lib/systemd/system/syncthing.service; enabled; vendor preset: disabled)</span><br><span class="line">    Active: active (running) since Sat 2022-02-05 19:38:53 CST; 2s ago</span><br><span class="line">  Main PID: 5605 (syncthing)</span><br><span class="line">     Tasks: 21 (limit: 9415)</span><br><span class="line">    Memory: 63.0M</span><br><span class="line">       CPU: 3.172s</span><br><span class="line">    CGroup: /system.slice/syncthing.service</span><br><span class="line">            ├─5605 /usr/bin/syncthing</span><br><span class="line">            └─5615 /usr/bin/syncthing</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>ps</p>
+<p>这里找到一个大老翻译的linux的<a href="http://www.jinbuguo.com/systemd/systemd.unit.html#" target="_blank">service手册供参考</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/06/05/%E5%B9%B4%E5%BA%A62021/" rel="prev" title="2021年年度总结">
+      <i class="fa fa-chevron-left"></i> 2021年年度总结
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/06/05/%E4%BD%BF%E7%94%A8nethogs%E7%9B%91%E8%A7%86%E7%BD%91%E7%BB%9C/" rel="next" title="服务器使用nethogs监视网络">
+      服务器使用nethogs监视网络 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1%EF%BC%8C%E6%96%B0%E5%BB%BA%E6%9C%8D%E5%8A%A1%E6%96%87%E4%BB%B6"><span class="nav-number">1.</span> <span class="nav-text">1，新建服务文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%90%AF%E5%8A%A8-%E5%81%9C%E6%AD%A2-%E9%87%8D%E5%90%AF%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.</span> <span class="nav-text">2. 启动&#x2F;停止&#x2F;重启服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%BC%80%E6%9C%BA%E8%87%AA%E5%8A%A8%E5%90%AF%E5%8A%A8"><span class="nav-number">3.</span> <span class="nav-text">3. 开机自动启动</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Well Wang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Well Wang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

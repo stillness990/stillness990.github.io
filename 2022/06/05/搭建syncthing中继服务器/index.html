@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="–发现周末的时候syncthing的公共中继服务器的速度太慢，于是找了网上的资料打算自己搭建中继服务器 1. 服务器部署1.1 此处linux服务器为例，此处注意一点要打开22067端口下载中继服务器，根据不同的版本 wget https:&#x2F;&#x2F;github.com&#x2F;syncthing&#x2F;relaysrv&#x2F;releases&#x2F;download&#x2F;v1.3.0&#x2F;strelaysrv-linux-amd64-">
+<meta property="og:type" content="article">
+<meta property="og:title" content="syncthing 中继服务器搭建">
+<meta property="og:url" content="http://example.com/2022/06/05/%E6%90%AD%E5%BB%BAsyncthing%E4%B8%AD%E7%BB%A7%E6%9C%8D%E5%8A%A1%E5%99%A8/index.html">
+<meta property="og:site_name" content="Well Wang的blog">
+<meta property="og:description" content="–发现周末的时候syncthing的公共中继服务器的速度太慢，于是找了网上的资料打算自己搭建中继服务器 1. 服务器部署1.1 此处linux服务器为例，此处注意一点要打开22067端口下载中继服务器，根据不同的版本 wget https:&#x2F;&#x2F;github.com&#x2F;syncthing&#x2F;relaysrv&#x2F;releases&#x2F;download&#x2F;v1.3.0&#x2F;strelaysrv-linux-amd64-">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/1050fb49f4b74c65bc4e73510cdc472d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAV1dfc3RpbGw=,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="article:published_time" content="2022-06-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-05T07:31:29.845Z">
+<meta property="article:author" content="Well Wang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/1050fb49f4b74c65bc4e73510cdc472d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAV1dfc3RpbGw=,size_20,color_FFFFFF,t_70,g_se,x_16">
+
+<link rel="canonical" href="http://example.com/2022/06/05/%E6%90%AD%E5%BB%BAsyncthing%E4%B8%AD%E7%BB%A7%E6%9C%8D%E5%8A%A1%E5%99%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>syncthing 中继服务器搭建 | Well Wang的blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Well Wang的blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/05/%E6%90%AD%E5%BB%BAsyncthing%E4%B8%AD%E7%BB%A7%E6%9C%8D%E5%8A%A1%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Well Wang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Well Wang的blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          syncthing 中继服务器搭建
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-06-05 00:00:00 / 修改时间：15:31:29" itemprop="dateCreated datePublished" datetime="2022-06-05T00:00:00+08:00">2022-06-05</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>–<br>发现周末的时候syncthing的公共中继服务器的速度太慢，于是找了网上的资料打算自己搭建中继服务器</p>
+<h4 id="1-服务器部署"><a href="#1-服务器部署" class="headerlink" title="1. 服务器部署"></a>1. 服务器部署</h4><p>1.1 此处linux服务器为例，<strong>此处注意一点要打开22067端口</strong><br>下载中继服务器，根据不同的版本</p>
+<pre><code>wget https://github.com/syncthing/relaysrv/releases/download/v1.3.0/strelaysrv-linux-amd64-v1.3.0.tar.gz
+</code></pre>
+<p>1.2 解压压缩包</p>
+<pre><code>tar -zxvf strelaysrv-linux-amd64-v1.3.0.tar.gz
+</code></pre>
+<p>1.3 进入目录</p>
+<pre><code>cd strelaysrv-linux-amd64-v1.3.0
+</code></pre>
+<p>1.4 运行程序</p>
+<pre><code>./strelaysrv #默认中继服务器启动后会加入公共中继池供其他人共同使用
+</code></pre>
+<p>文件地址</p>
+<pre><code>/usr/local/syncthinx/strelaysrv-linux-amd64-v1.3.0
+</code></pre>
+<p>测试执行文件</p>
+<pre><code>/usr/local/syncthinx/strelaysrv-nux-amd64-v1.3.0/./strelaysrv -pools=&quot;&quot;
+</code></pre>
+<p>1.5 使用ctrl+c，结束进程</p>
+<p>1.6 复制设备ID</p>
+<pre><code>relay://0.0.0.0:22067/?id=UT74OCE-CGTLWVZ-GAHTLHM-YHJHJQU-GEJ7QFW-ZRL7SNP-7LTHSOZ-RUR5BAK&amp;pingInterval=1m0s&amp;networkTimeout=2m0s&amp;sessionLimitBps=0&amp;globalLimitBps=0&amp;statusAddr=:22070&amp;providedBy=
+
+relay://0.0.0.0:22067/?id=5NA226G-JNGYPZ5-E2RYJUQ-S2TTMQC-QE55DHT-YD5GDJI-VZHPGZK-7T4PHAI&amp;pingInterval=1m0s&amp;networkTimeout=2m0s&amp;sessionLimitBps=0&amp;globalLimitBps=0&amp;statusAddr=:22070&amp;providedBy=
+</code></pre>
+<p>此处将0.0.0.0改为服务器地址并记录下来</p>
+<h4 id="2-客户端搭建"><a href="#2-客户端搭建" class="headerlink" title="2. 客户端搭建"></a>2. 客户端搭建</h4><p>在客户端的设置&gt;协议监听地址出粘贴上我们刚刚记录的东西</p>
+<p><img src="https://img-blog.csdnimg.cn/1050fb49f4b74c65bc4e73510cdc472d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAV1dfc3RpbGw=,size_20,color_FFFFFF,t_70,g_se,x_16" alt="在这里插入图片描述"><br>ps：我使用的日本服务器中云备份，使用韩国和国内阿里云轻量服务器做中继服务器</p>
+<h4 id="3-升级问题"><a href="#3-升级问题" class="headerlink" title="3. 升级问题"></a>3. 升级问题</h4><pre><code>sudo chown centos:centos * # 设置程序用户组后可以不必登录服务器后台直接在web管理页面点击升级
+</code></pre>
+<h4 id="4-设置私有中继服务器"><a href="#4-设置私有中继服务器" class="headerlink" title="4. 设置私有中继服务器"></a>4. 设置私有中继服务器</h4><ol>
+<li> 结束进程</li>
+</ol>
+<pre><code> ps -ef | grep strelaysrv
+</code></pre>
+<ol start="2">
+<li> 公私有中继服务器设置</li>
+</ol>
+<pre><code>-pools=&lt;pool addresses&gt; #官网说明，如果&lt;&gt;里为空则是私有中继服务器
+
+./syncthing -pools=&quot;&quot; #私有中继,
+# 启动后设备码可能会变动，这个需要记录下来
+# 多个中继服务器之间可以使用,隔开
+# 在web UI协议监听地址中加入default可以使用公共中继池
+</code></pre>
+<ol start="3">
+<li> 后台启动</li>
+</ol>
+<pre><code>nohup ./syncthing -pools=&quot;&quot; &amp;
+</code></pre>
+<p>官网给出了详细的参数配置 <a target="_blank" rel="noopener" href="https://docs.syncthing.net/users/strelaysrv.html#description">Syncthing Relay Server</a>，上面提到的不再重复</p>
+<pre><code>-global-rate=&lt;bytes/s&gt; #全局限速，bytes作为单位
+</code></pre>
+<p>附：<a href="https://relays.syncthing.net/" target="_blank">全球中继服务器地图</a>,这里可以看到全球的syncthing中继服务器位置和流量</p>
+<h4 id="5-注册系统服务开机启动"><a href="#5-注册系统服务开机启动" class="headerlink" title="5. 注册系统服务开机启动"></a>5. 注册系统服务开机启动</h4><p>中继服务器程序地址</p>
+<pre><code>/home/admin/strelaysrv-linux-amd64-v1.3.0/strelaysrv -pools=&quot;&quot; #ubuntu
+
+/usr/local/syncthinx/strelaysrv-linux-amd64-v1.3.0/strelaysrv -pools=&quot;&quot; #centos
+</code></pre>
+<p>编辑service</p>
+<pre><code>[Unit]
+Description=strelaysrv
+After=network.target
+[Service]
+Type=simple
+User=centos
+ExecStart=/usr/local/syncthinx/strelaysrv-linux-amd64-v1.3.0/./strelaysrv -pools=&quot;&quot;
+ExecStop=kill -9 $(pidof strelaysrv)
+ExecReload=kill -9 $(pidof strelaysrv) &amp;&amp; /usr/local/syncthinx/strelaysrv-linux-amd64-v1.3.0/./strelaysrv -pools=&quot;&quot;
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<p>报错检查服务日志</p>
+<pre><code> [/usr/lib/systemd/system/strelaysrv.service:7] Unknown lvalue &#39;ExecStar&#39; in section &#39;Service&#39;
+nal systemd[1]: [/usr/lib/systemd/system/strelaysrv.service:8] Executable path is not absolute, ignoring: kill -9 $(pidof
+nal systemd[1]: [/usr/lib/systemd/system/strelaysrv.service:9] Executable path is not absolute, ignoring: kill -9 $(pidof
+nal systemd[1]: strelaysrv.service lacks both ExecStart= and ExecStop= setting. Refusing.
+</code></pre>
+<p>发现拼写错误</p>
+<p>继续运行服务</p>
+<p>日志：</p>
+<pre><code>strelaysrv.service: main process exited, code=exited, status=1/FAILURE
+Unit strelaysrv.service entered failed state.
+strelaysrv.service failed.
+</code></pre>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/06/05/%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BAkms%E6%9C%8D%E5%8A%A1-vol/" rel="prev" title="搭建kms服务器">
+      <i class="fa fa-chevron-left"></i> 搭建kms服务器
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/06/05/%E5%B9%B4%E5%BA%A62022/" rel="next" title="2022年读总结">
+      2022年读总结 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%83%A8%E7%BD%B2"><span class="nav-number">1.</span> <span class="nav-text">1. 服务器部署</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%90%AD%E5%BB%BA"><span class="nav-number">2.</span> <span class="nav-text">2. 客户端搭建</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%8D%87%E7%BA%A7%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">3. 升级问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E8%AE%BE%E7%BD%AE%E7%A7%81%E6%9C%89%E4%B8%AD%E7%BB%A7%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">4.</span> <span class="nav-text">4. 设置私有中继服务器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E6%B3%A8%E5%86%8C%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8"><span class="nav-number">5.</span> <span class="nav-text">5. 注册系统服务开机启动</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Well Wang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Well Wang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="shutdown -h now 即刻关机    shutdown -h 10 10分钟后关机   shutdown -h 11:00 11点关机   shutdown -h +10 预订10分钟后关机   shutdown -c 取消关机   shutdown -r now 重启   shutdown -r 10 10分钟后重启   shutdown -r 11：00 11点重启   reb">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux速查手册">
+<meta property="og:url" content="http://example.com/2022/06/05/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%A4%87%E7%94%A8%E6%89%8B%E5%86%8C/index.html">
+<meta property="og:site_name" content="Well Wang的blog">
+<meta property="og:description" content="shutdown -h now 即刻关机    shutdown -h 10 10分钟后关机   shutdown -h 11:00 11点关机   shutdown -h +10 预订10分钟后关机   shutdown -c 取消关机   shutdown -r now 重启   shutdown -r 10 10分钟后重启   shutdown -r 11：00 11点重启   reb">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-06-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-05T07:31:50.183Z">
+<meta property="article:author" content="Well Wang">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2022/06/05/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%A4%87%E7%94%A8%E6%89%8B%E5%86%8C/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>linux速查手册 | Well Wang的blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Well Wang的blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/05/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%A4%87%E7%94%A8%E6%89%8B%E5%86%8C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Well Wang">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Well Wang的blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          linux速查手册
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-06-05 00:00:00 / 修改时间：15:31:50" itemprop="dateCreated datePublished" datetime="2022-06-05T00:00:00+08:00">2022-06-05</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <table>
+<thead>
+<tr>
+<th align="center">shutdown -h now</th>
+<th align="center">即刻关机</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">shutdown -h 10</td>
+<td align="center">10分钟后关机</td>
+</tr>
+<tr>
+<td align="center">shutdown -h 11:00</td>
+<td align="center">11点关机</td>
+</tr>
+<tr>
+<td align="center">shutdown -h +10</td>
+<td align="center">预订10分钟后关机</td>
+</tr>
+<tr>
+<td align="center">shutdown -c</td>
+<td align="center">取消关机</td>
+</tr>
+<tr>
+<td align="center">shutdown -r now</td>
+<td align="center">重启</td>
+</tr>
+<tr>
+<td align="center">shutdown -r 10</td>
+<td align="center">10分钟后重启</td>
+</tr>
+<tr>
+<td align="center">shutdown -r 11：00</td>
+<td align="center">11点重启</td>
+</tr>
+<tr>
+<td align="center">reboot</td>
+<td align="center">重启</td>
+</tr>
+<tr>
+<td align="center">init 6</td>
+<td align="center">重启</td>
+</tr>
+<tr>
+<td align="center">init 0</td>
+<td align="center">立刻关机</td>
+</tr>
+<tr>
+<td align="center">telinlt 0</td>
+<td align="center">关机</td>
+</tr>
+<tr>
+<td align="center">poweroff</td>
+<td align="center">关机</td>
+</tr>
+<tr>
+<td align="center">sync</td>
+<td align="center">buff数据同步到磁盘</td>
+</tr>
+<tr>
+<td align="center">logout</td>
+<td align="center">退出登录shell</td>
+</tr>
+<tr>
+<td align="center">uname -a</td>
+<td align="center">查看内核/os/cpu信息</td>
+</tr>
+<tr>
+<td align="center">uname -r</td>
+<td align="center">查看内核版本</td>
+</tr>
+<tr>
+<td align="center">uname -m</td>
+<td align="center">查看处理器架构</td>
+</tr>
+<tr>
+<td align="center">hostname</td>
+<td align="center">查看计算机名</td>
+</tr>
+<tr>
+<td align="center">who</td>
+<td align="center">查看当前登录系统用户</td>
+</tr>
+<tr>
+<td align="center">who am i</td>
+<td align="center">显示登陆时的用户名</td>
+</tr>
+<tr>
+<td align="center">whoami</td>
+<td align="center">显示当前用户名</td>
+</tr>
+<tr>
+<td align="center">cat /proc/version</td>
+<td align="center">查看linux版本信息</td>
+</tr>
+<tr>
+<td align="center">free -h</td>
+<td align="center">查看系统内存用量和交换区用量</td>
+</tr>
+<tr>
+<td align="center">date</td>
+<td align="center">显示系统时间</td>
+</tr>
+<tr>
+<td align="center">cal 2021</td>
+<td align="center">显示2021年日历</td>
+</tr>
+<tr>
+<td align="center">top</td>
+<td align="center">动态显示cpu内存进程情况</td>
+</tr>
+<tr>
+<td align="center">fdisk -l</td>
+<td align="center">查看所有磁盘分区</td>
+</tr>
+<tr>
+<td align="center">swapon -s</td>
+<td align="center">查看所有交换分区</td>
+</tr>
+<tr>
+<td align="center">df -h</td>
+<td align="center">查看所有磁盘使用情况及挂载点</td>
+</tr>
+<tr>
+<td align="center">df -hl</td>
+<td align="center">同上</td>
+</tr>
+<tr>
+<td align="center">du -sh /dir</td>
+<td align="center">查看制定目录的大小</td>
+</tr>
+<tr>
+<td align="center">mount /dev/sda2 /mnt/sda2</td>
+<td align="center">挂载sda2盘</td>
+</tr>
+<tr>
+<td align="center">passwd</td>
+<td align="center">修改密码</td>
+</tr>
+<tr>
+<td align="center">last</td>
+<td align="center">查看用户登录日志</td>
+</tr>
+<tr>
+<td align="center">ifconfig</td>
+<td align="center">查看网络接口属性</td>
+</tr>
+<tr>
+<td align="center">ifconfig eth0</td>
+<td align="center">查看莫个网卡的配置</td>
+</tr>
+<tr>
+<td align="center">route -n</td>
+<td align="center">查看路由表</td>
+</tr>
+<tr>
+<td align="center">netstat -lntp</td>
+<td align="center">查看所有监听端口</td>
+</tr>
+<tr>
+<td align="center">netstat -antp</td>
+<td align="center">查看已经建立的TCP链接</td>
+</tr>
+<tr>
+<td align="center">netstat -ntulp | grep 80</td>
+<td align="center">查看80端口情况</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>netstat -lutp</td>
+<td>查看TCP/UDP的状态信息</td>
+</tr>
+<tr>
+<td>ifup eth0</td>
+<td>启用eth0 网络设备</td>
+</tr>
+<tr>
+<td>ifdown eth0</td>
+<td>禁用eth0设备</td>
+</tr>
+<tr>
+<td>ifconfig eth0 192.168.1.1 netmask 255.255.255.0</td>
+<td>配置eth0 IP地址</td>
+</tr>
+<tr>
+<td>dhclient eth0</td>
+<td>dhcp模式启用eth0</td>
+</tr>
+<tr>
+<td>route add -net 0/0 gw Gateway_IP</td>
+<td>配置默认网管</td>
+</tr>
+<tr>
+<td>host <a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a></td>
+<td>解析主机名</td>
+</tr>
+<tr>
+<td>nslookup</td>
+<td>查询DNS记录 查看域名名称解析是否正确</td>
+</tr>
+<tr>
+<td>ps -ef</td>
+<td>查看所有进程</td>
+</tr>
+<tr>
+<td>ps -ef | grep name</td>
+<td>查看需要的程序进程</td>
+</tr>
+<tr>
+<td>kill -s name</td>
+<td>kill 制定进程</td>
+</tr>
+<tr>
+<td>chkconfig –list</td>
+<td>列出系统服务</td>
+</tr>
+<tr>
+<td>systemctl status &lt;服务名&gt;</td>
+<td>查看某个服务</td>
+</tr>
+<tr>
+<td>systemctl start &lt;服务名&gt;</td>
+<td>启动某个服务</td>
+</tr>
+<tr>
+<td>systemctl  stop &lt;服务名&gt;</td>
+<td>终止某个服务</td>
+</tr>
+<tr>
+<td>systemctl restart &lt;服务名&gt;</td>
+<td>重启某个服务</td>
+</tr>
+<tr>
+<td>systemctl status &lt;服务名&gt;</td>
+<td>查看某个服务</td>
+</tr>
+<tr>
+<td>systemctl start &lt;服务名&gt;</td>
+<td>启动某个服务</td>
+</tr>
+<tr>
+<td>journalctl -u &lt;服务名&gt;</td>
+<td>查看某个服务日志</td>
+</tr>
+<tr>
+<td>journalctl -f</td>
+<td>查看服务日志</td>
+</tr>
+<tr>
+<td>systemctl disable &lt;服务名&gt;</td>
+<td>关闭自启动</td>
+</tr>
+<tr>
+<td>systemctl list-unit-files</td>
+<td>查看已经激活的服务</td>
+</tr>
+<tr>
+<td>pidof &lt;程序名&gt;</td>
+<td>查看某个程序的进程号</td>
+</tr>
+<tr>
+<td>ls</td>
+<td>查看文件目录列表</td>
+</tr>
+<tr>
+<td>ll</td>
+<td>显示所有文件和属性</td>
+</tr>
+<tr>
+<td>dir</td>
+<td>显示文件</td>
+</tr>
+<tr>
+<td>pwd</td>
+<td>显示当前路径</td>
+</tr>
+<tr>
+<td>mv old_dir new_dir</td>
+<td>重命名/移动目录</td>
+</tr>
+<tr>
+<td>cp -a dir1 dir2</td>
+<td>复制名录</td>
+</tr>
+<tr>
+<td>find -name file</td>
+<td>从根目录搜索文件目录</td>
+</tr>
+<tr>
+<td>find /dir -name *.bin</td>
+<td>在目录dir中搜索所有.bin后缀的文件</td>
+</tr>
+<tr>
+<td>locate *.mp4</td>
+<td>寻找所有.mp4文件</td>
+</tr>
+<tr>
+<td>locate &lt;关键字&gt;</td>
+<td>快速定位文件</td>
+</tr>
+<tr>
+<td>which</td>
+<td>快速查找文件位置</td>
+</tr>
+<tr>
+<td>chmod +</td>
+<td>设置文件读写权限</td>
+</tr>
+<tr>
+<td>chown arch:arch *</td>
+<td>设置这个目录下所有文件的用户组和用户</td>
+</tr>
+<tr>
+<td>cat rfile1</td>
+<td>查看文件内容</td>
+</tr>
+<tr>
+<td>cat -n file1</td>
+<td>查看文件内容并标识行数</td>
+</tr>
+<tr>
+<td>more file1</td>
+<td>查看一个长文件内容</td>
+</tr>
+<tr>
+<td>grep code hello.txt</td>
+<td>在hello.txt中查找关机词code</td>
+</tr>
+<tr>
+<td>sed -n ‘5p;5q’hello.txt</td>
+<td>查看第五行</td>
+</tr>
+<tr>
+<td>zip XX.zip file</td>
+<td>压缩至zip包</td>
+</tr>
+<tr>
+<td>zip -r XXX.zip file1 file2 dir1</td>
+<td>将多个文件+目录压成zip包</td>
+</tr>
+<tr>
+<td>unzip XXX.zip</td>
+<td>解压缩zip包</td>
+</tr>
+<tr>
+<td>tar -cvf XXX.tar rile</td>
+<td>创建非压缩tar包</td>
+</tr>
+<tr>
+<td>tar -tf xxx.tar</td>
+<td>查看tar包内容</td>
+</tr>
+<tr>
+<td>tar -xvf xxx.tar</td>
+<td>解压tar包</td>
+</tr>
+<tr>
+<td>tar -xvf xxx.tar -C /dir</td>
+<td>解压至某个文件</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/06/05/nextcloud/" rel="prev" title="ubuntu下云盘搭建">
+      <i class="fa fa-chevron-left"></i> ubuntu下云盘搭建
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/06/05/linux%E4%BA%A4%E6%8D%A2%E7%A9%BA%E9%97%B4/" rel="next" title="linux交换空间">
+      linux交换空间 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Well Wang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Well Wang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
